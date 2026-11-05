@@ -12,6 +12,7 @@ import ContactsPage from './pages/ContactsPage';
 import DestinationsPage from './pages/DestinationsPage';
 import DirectoryPage from './pages/DirectoryPage';
 import HomePage from './pages/HomePage';
+import MyOrdersPage from './pages/MyOrdersPage';
 import NotFoundPage from './pages/NotFoundPage';
 import PlaygroundPage from './pages/PlaygroundPage';
 import ProductDetailPage from './pages/products/ProductDetailPage';
@@ -52,6 +53,9 @@ export function AppRoutes() {
         {/* Phase 8: pathless LAYOUT routes that guard their children */}
         <Route element={<ProtectedRoute />}>
           <Route path="account" element={<AccountPage />} />
+        </Route>
+        <Route element={<ProtectedRoute roles={[ROLES.customer]} />}>
+          <Route path="orders" element={<MyOrdersPage />} />
         </Route>
         <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
           <Route path="admin" element={<AdminPage />} />

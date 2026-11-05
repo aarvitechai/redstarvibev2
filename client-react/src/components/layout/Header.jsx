@@ -25,6 +25,7 @@ export default function Header({ appName }) {
   const cartCount = useSelector(selectCartCount); // the header re-renders only when the COUNT changes
   const links = [
     ...NAV,
+    ...(hasRole(ROLES.customer) ? [{ to: ROUTES.orders, label: 'My orders' }] : []),
     ...(user ? [{ to: ROUTES.account, label: 'Account' }] : []),
     ...(hasRole(ROLES.admin) ? [{ to: ROUTES.admin, label: 'Admin' }] : []),
   ];

@@ -1,0 +1,65 @@
+<section aria-labelledby="orders-title">
+  <h1 id="orders-title">My orders</h1>
+  @if (placed()) {
+    <p role="status" class="success">Thank you! Order #{{ placed() }} has been placed.</p>
+  }
+  @if (rateError()) { <p role="alert" class="error">{{ rateError() }}</p> }
+
+  @if (loadError()) {
+    <div role="alert" class="error">
+      Could not load your orders: {{ loadError() }}
+      <button type="button" class="btn" (click)="list.reload()">Retry</button>
+    </div>
+  } @else if (!data()) {
+    <p class="muted">Loading…</p>
+  } @else if (data()!.totalCount === 0) {
+    <p class="muted">No orders yet. <a routerLink="/products">Start shopping</a></p>
+  } @else {
+    @let d = data()!;
+    <ul class="orders" aria-label="Orders" [attr.aria-busy]="list.isLoading()">
+      @for (order of d.items; track order.id) {
+        <li class="order" [attr.aria-label]="'Order ' + order.id">
+          <header class="order-head">
+            <strong>Order #{{ order.id }}</strong>
+            <span class="muted">{{ order.createdAt | date: 'medium' }}</span>
+            <span class="status" [class]="'status status-' + order.status.toLowerCase()">{{ order.status }}</span>
+          </header>
+          <table class="lines">
+            <thead>
+              <tr><th scope="col">Item</th><th scope="col">Qty</th><th scope="col">Price</th><th scope="col">Total</th>
+                @if (order.canRate) { <th scope="col">Your rating</th> }</tr>
+            </thead>
+            <tbody>
+              @for (line of order.lines; track line.id) {
+                <tr>
+                  <td>{{ line.productName }}</td>
+                  <td>{{ line.quantity }}</td>
+                  <td>{{ line.unitPrice | currency: 'INR' : 'symbol' : '1.2-2' : 'en-IN' }}</td>
+                  <td>{{ line.lineTotal | currency: 'INR' : 'symbol' : '1.2-2' : 'en-IN' }}</td>
+                  @if (order.canRate) {
+                    <td><app-star-rating [value]="line.rating" [label]="'Rate ' + line.productName" [disabled]="rating()"
+                                         (rated)="rate(order.id, line.id, $event)" /></td>
+                  }
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr><th scope="row" colspan="3">Total</th><td><strong>{{ order.total | currency: 'INR' : 'symbol' : '1.2-2' : 'en-IN' }}</strong></td>
+                @if (order.canRate) { <td></td> }</tr>
+            </tfoot>
+          </table>
+          @if (!order.canRate && order.status !== 'Cancelled') {
+            <p class="muted">You can rate the items once the order is completed.</p>
+          }
+        </li>
+      }
+    </ul>
+    @if (d.totalPages > 1) {
+      <nav class="pager" aria-label="Pagination">
+        <button type="button" class="btn" [disabled]="!d.hasPrevious" (click)="goTo(d.page - 1)">← Newer</button>
+        <span>Page {{ d.page }} of {{ d.totalPages }}</span>
+        <button type="button" class="btn" [disabled]="!d.hasNext" (click)="goTo(d.page + 1)">Older →</button>
+      </nav>
+    }
+  }
+</section>

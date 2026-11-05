@@ -12,6 +12,7 @@ export const ROUTES = {
   admin: '/admin',
   unauthorized: '/unauthorized',
   cart: '/cart',
+  orders: '/orders',
   destinations: '/destinations',
 };
 

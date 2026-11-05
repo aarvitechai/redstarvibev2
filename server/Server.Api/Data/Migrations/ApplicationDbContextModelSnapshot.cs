@@ -293,6 +293,98 @@ namespace Server.Api.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Server.Api.Models.Entities.OrderDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("LineTotal")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("OrderHeaderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("RatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderHeaderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderDetails", t =>
+                        {
+                            t.HasCheckConstraint("CK_OrderDetails_Quantity", "[Quantity] BETWEEN 1 AND 20");
+
+                            t.HasCheckConstraint("CK_OrderDetails_Rating", "[Rating] IS NULL OR [Rating] BETWEEN 1 AND 5");
+                        });
+                });
+
+            modelBuilder.Entity("Server.Api.Models.Entities.OrderHeader", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status", "CreatedAt");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("OrderHeaders");
+                });
+
             modelBuilder.Entity("Server.Api.Models.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -553,6 +645,28 @@ namespace Server.Api.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Server.Api.Models.Entities.OrderDetail", b =>
+                {
+                    b.HasOne("Server.Api.Models.Entities.OrderHeader", "OrderHeader")
+                        .WithMany("Details")
+                        .HasForeignKey("OrderHeaderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OrderHeader");
+                });
+
+            modelBuilder.Entity("Server.Api.Models.Entities.OrderHeader", b =>
+                {
+                    b.HasOne("Server.Api.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Server.Api.Models.Entities.Product", b =>
                 {
                     b.HasOne("Server.Api.Models.Entities.Category", "Category")
@@ -578,6 +692,11 @@ namespace Server.Api.Data.Migrations
             modelBuilder.Entity("Server.Api.Models.Entities.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Server.Api.Models.Entities.OrderHeader", b =>
+                {
+                    b.Navigation("Details");
                 });
 #pragma warning restore 612, 618
         }

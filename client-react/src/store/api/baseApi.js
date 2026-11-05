@@ -83,7 +83,7 @@ export const baseApi = createApi({
   baseQuery,
   // TAGS: labels that connect queries to mutations. A query PROVIDES tags; a mutation INVALIDATES them.
   // Any cached query whose tags were invalidated refetches automatically, so the UI stays in sync.
-  tagTypes: ['Destination'],
+  tagTypes: ['Destination', 'Order'],
   keepUnusedDataFor: 60, // seconds to keep data no component uses any more (navigate away and back: instant)
   endpoints: () => ({}),
 });

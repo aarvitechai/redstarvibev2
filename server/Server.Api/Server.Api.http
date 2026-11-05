@@ -85,3 +85,19 @@ Content-Type: application/json
 GET {{Server.Api_HostAddress}}/api/destinations?page=1&pageSize=6&search=india&visited=false
 
 ###
+### Phase 13: place an order as a CUSTOMER (log in as asha@redstar.dev first and put the token in @token)
+POST {{Server.Api_HostAddress}}/api/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "items": [ { "productId": 1, "quantity": 2 }, { "productId": 7, "quantity": 1 } ] }
+
+### Phase 13: my orders
+GET {{Server.Api_HostAddress}}/api/orders/mine
+Authorization: Bearer {{token}}
+
+### Phase 13 (ADMIN token): all orders, then move one along (copy rowVersion from the list)
+GET {{Server.Api_HostAddress}}/api/orders?status=Pending
+Authorization: Bearer {{token}}
+
+###

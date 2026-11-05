@@ -1,5 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { ROLES } from '../constants/roles';
+import { useAuth } from '../hooks/useAuth';
+import { usePlaceOrderMutation } from '../store/api/ordersApi';
 import { ROUTES } from '../constants/routes';
 import {
   MAX_QUANTITY,
@@ -23,6 +26,20 @@ export default function CartPage() {
   const subtotal = useSelector(selectCartSubtotal); // memoized (createSelector)
   const quote = useSelector(selectCartQuote);
   const { quoteStatus, quoteError } = useSelector((s) => s.cart);
+  const { isAuthenticated, hasRole } = useAuth();
+  const [placeOrder, placing] = usePlaceOrderMutation();
+  const navigate = useNavigate();
+
+  // CHECKOUT: send ids and quantities; the SERVER prices the order, saves it in one transaction, and returns it
+  async function checkout() {
+    try {
+      const order = await placeOrder(items).unwrap();
+      dispatch(cartCleared());
+      navigate(`${ROUTES.orders}?placed=${order.id}`);
+    } catch {
+      // the error is shown from `placing.error` below (e.g. "Some products are no longer available")
+    }
+  }
 
   if (items.length === 0) {
     return (
@@ -86,6 +103,22 @@ export default function CartPage() {
           </button>
           <button type="button" className={styles.btn} onClick={() => dispatch(cartCleared())}>Empty cart</button>
         </div>
+        <div className={styles.actions}>
+          {!isAuthenticated ? (
+            <p className={styles.muted}>
+              <Link to={ROUTES.login} state={{ from: { pathname: ROUTES.cart } }}>Log in</Link> to place your order.
+            </p>
+          ) : hasRole(ROLES.customer) ? (
+            <button type="button" className={styles.add} onClick={checkout} disabled={placing.isLoading}>
+              {placing.isLoading ? 'Placing order…' : 'Place order'}
+            </button>
+          ) : (
+            <p className={styles.muted}>Admin accounts can't place orders. Log in as a customer to check out.</p>
+          )}
+        </div>
+        {placing.error && (
+          <p role="alert" className={styles.warn}>{placing.error.fieldErrors?.items?.[0] ?? placing.error.message}</p>
+        )}
       </div>
     </section>
   );

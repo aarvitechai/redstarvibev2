@@ -1,6 +1,10 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { ROLES } from '../../core/auth/auth';
+import { Session } from '../../core/auth/session';
+import { ApiError } from '../../core/http/api';
+import { OrdersApi } from '../orders/orders-api';
 import { CartStore } from './cart-store';
 import { MAX_QUANTITY } from './cart.state';
 
@@ -48,6 +52,16 @@ import { MAX_QUANTITY } from './cart.state';
             </button>
             <button type="button" class="btn" (click)="cart.dispatch({ type: 'cleared' })">Empty cart</button>
           </div>
+          <div class="actions">
+            @if (!session.isAuthenticated()) {
+              <p class="muted"><a routerLink="/login" [queryParams]="{ returnUrl: '/cart' }">Log in</a> to place your order.</p>
+            } @else if (session.hasRole(roles.customer)) {
+              <button type="button" class="add" (click)="checkout()" [disabled]="placing()">{{ placing() ? 'Placing order…' : 'Place order' }}</button>
+            } @else {
+              <p class="muted">Admin accounts can't place orders. Log in as a customer to check out.</p>
+            }
+          </div>
+          @if (placeError()) { <p role="alert" class="warn">{{ placeError() }}</p> }
         </div>
       }
     </section>
@@ -72,7 +86,29 @@ import { MAX_QUANTITY } from './cart.state';
 })
 export class CartPage {
   protected readonly cart = inject(CartStore);
+  protected readonly session = inject(Session);
+  private readonly orders = inject(OrdersApi);
+  private readonly router = inject(Router);
   protected readonly max = MAX_QUANTITY;
+  protected readonly roles = ROLES;
+  protected readonly placing = signal(false);
+  protected readonly placeError = signal<string | null>(null);
+
+  // CHECKOUT: ids and quantities go to the server, which prices the order and saves it in one transaction
+  protected checkout(): void {
+    this.placing.set(true);
+    this.placeError.set(null);
+    this.orders.place(this.cart.items()).subscribe({
+      next: (order) => {
+        this.cart.dispatch({ type: 'cleared' });
+        this.router.navigate(['/orders'], { queryParams: { placed: order.id } });
+      },
+      error: (e: ApiError) => {
+        this.placing.set(false);
+        this.placeError.set(e.fieldErrors?.['items']?.[0] ?? e.message); // e.g. "Some products are no longer available"
+      },
+    });
+  }
 
   protected setQty(productId: number, quantity: number): void {
     this.cart.dispatch({ type: 'quantityChanged', productId, quantity });

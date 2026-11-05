@@ -23,6 +23,7 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 10: RTK Query (Project 5: Destination Manager)](docs/phase-10-rtk-query.md)
 - [Phase 11: EF Core + SQL Server (Project 6: Product API)](docs/phase-11-efcore.md)
 - [Phase 12: Identity, JWT, Roles and CORS (Project 7: Auth API)](docs/phase-12-identity-jwt.md)
+- [Phase 13: Orders and Ratings (Project 8)](docs/phase-13-orders-ratings.md)
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).

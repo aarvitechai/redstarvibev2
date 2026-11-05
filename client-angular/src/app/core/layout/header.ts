@@ -52,6 +52,7 @@ export class Header {
   ];
   protected readonly links = computed(() => [
     ...this.baseLinks,
+    ...(this.session.hasRole(ROLES.customer) ? [{ path: '/orders', label: 'My orders' }] : []),
     ...(this.session.isAuthenticated() ? [{ path: '/account', label: 'Account' }] : []),
     ...(this.session.hasRole(ROLES.admin) ? [{ path: '/admin', label: 'Admin' }] : []),
   ]);

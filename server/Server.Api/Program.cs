@@ -16,13 +16,15 @@ using Server.Api.Models;
 using Server.Api.Models.Entities;
 using Server.Api.Services;
 
-// Later phases add: order services (13).
+// Phase 13 adds orders; Phase 15 adds production hardening.
 var builder = WebApplication.CreateBuilder(args);
 
 const string ClientCorsPolicy = "ClientCors";
 
 
 builder.Services.AddControllers()
+    // Enums travel as TEXT in JSON ("Pending", not 0), both ways: readable, and safe to reorder later
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()))
     // [ApiController] returns 400 automatically when a DTO fails validation.
     // Wrap those errors in our ApiResponse envelope (with per-field errors) so clients see ONE error shape.
     .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = ValidationResponses.InvalidModelState);
@@ -49,6 +51,7 @@ builder.Services.AddDbContext<ApplicationDbContext>((services, options) =>
 // The rule: never inject a SCOPED service into a SINGLETON (a "captive dependency"). Development validates this at startup.
 builder.Services.AddScoped<IProductCatalog, EfProductCatalog>();
 builder.Services.AddScoped<IProductAdminService, EfProductAdminService>();
+builder.Services.AddScoped<OrderService>(); // Phase 13
 builder.Services.AddSingleton<IProductImageStore, FileSystemProductImageStore>();
 builder.Services.AddSingleton<IDestinationService, InMemoryDestinationService>(); // Phase 10
 builder.Services.AddSingleton(TimeProvider.System); // "now" as a dependency, so tests can control time

@@ -36,6 +36,13 @@ export const routes: Routes = [
     title: t('Account'),
   },
   {
+    path: 'orders',
+    canActivate: [roleGuard(ROLES.customer)],
+    runGuardsAndResolvers: 'always',
+    loadComponent: () => import('./features/orders/my-orders-page').then((m) => m.MyOrdersPage),
+    title: t('My orders'),
+  },
+  {
     path: 'admin',
     canActivate: [roleGuard(ROLES.admin)],
     runGuardsAndResolvers: 'always',
