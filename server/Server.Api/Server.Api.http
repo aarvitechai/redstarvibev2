@@ -4,3 +4,10 @@
 GET {{Server.Api_HostAddress}}/health
 
 ###
+### Phase 2: all students
+GET {{Server.Api_HostAddress}}/api/students
+
+### Phase 2: one student (try 99 for a 404)
+GET {{Server.Api_HostAddress}}/api/students/1
+
+###

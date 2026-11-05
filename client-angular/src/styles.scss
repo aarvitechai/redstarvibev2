@@ -1,2 +1,39 @@
+/* Design tokens (same as the React client): components use these variables, never raw colours */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1c1f24;
+  --muted: #5f6672;
+  --border: #e2e5ea;
+  --primary: #c8102e;
+  --primary-contrast: #ffffff;
+  --success: #1f7a3d;
+  --success-bg: #e3f4e9;
+  --neutral-bg: #eceef1;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121418;
+    --surface: #1b1e24;
+    --text: #e8eaed;
+    --muted: #a0a6b0;
+    --border: #2c3038;
+    --primary: #ff4d5e;
+    --success: #6fd394;
+    --success-bg: #183524;
+    --neutral-bg: #2a2e36;
+    --shadow: none;
+  }
+}
+
 *, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}

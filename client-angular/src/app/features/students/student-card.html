@@ -1,0 +1,16 @@
+@let s = student();
+<app-card [attr.aria-label]="s.name">
+  <div class="card-head">
+    <app-avatar [name]="s.name" />
+    <div>
+      <h3 class="name">{{ s.name }}</h3>
+      <a class="email" [href]="'mailto:' + s.email">{{ s.email }}</a>
+    </div>
+  </div>
+  <dl class="meta">
+    <div><dt>Course</dt><dd>{{ s.course }}</dd></div>
+    <div><dt>Year</dt><dd>{{ s.year }}</dd></div>
+  </dl>
+  <!-- [class.x]="condition" toggles a class, like the className ternary in React -->
+  <span class="badge" [class.active]="s.isActive">{{ s.isActive ? 'Active' : 'Inactive' }}</span>
+</app-card>

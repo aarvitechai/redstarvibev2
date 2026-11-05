@@ -1,4 +1,5 @@
 using Scalar.AspNetCore;
+using Server.Api.Services;
 
 // Phase 0 baseline. Later phases add: DbContext (11), Identity + JWT (12), services (13).
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ const string ClientCorsPolicy = "ClientCors";
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
 builder.Services.AddControllers();
+builder.Services.AddSingleton<IStudentService, InMemoryStudentService>(); // Phase 2: in-memory, Phase 11: EF Core
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();   // consistent RFC 7807 error shape
 builder.Services.AddHealthChecks();     // DB health check is added in Phase 11

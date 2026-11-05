@@ -1,14 +1,16 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { environment } from '../environments/environment';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Layout } from './core/layout/layout';
+import { StudentsPage } from './features/students/students-page';
 
-// Phase 0 placeholder. Layout, routes and state arrive in later phases.
+// Phase 2: App = Layout + one page. Phase 7 adds routing.
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.scss',
+  imports: [Layout, StudentsPage],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <app-layout appName="RedStarVibe">
+      <app-students-page />
+    </app-layout>
+  `,
 })
-export class App {
-  protected readonly apiUrl = environment.apiUrl;
-}
+export class App {}

@@ -1,0 +1,13 @@
+/* CSS Modules: class names are scoped to this file, so .header here never clashes with another .header */
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+.inner { max-width: 1080px; margin: 0 auto; padding: 0 16px; width: 100%; }
+
+.header { background: var(--surface); border-bottom: 1px solid var(--border); }
+.header .inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--primary); }
+.navLink { color: var(--text); text-decoration: none; font-weight: 500; }
+.navLink:hover { color: var(--primary); }
+
+.main { flex: 1; max-width: 1080px; margin: 0 auto; padding: 24px 16px; width: 100%; }
+
+.footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.875rem; padding: 16px 0; }

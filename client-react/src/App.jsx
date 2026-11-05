@@ -1,11 +1,11 @@
-import { API_URL } from './constants/config';
+import Layout from './components/layout/Layout';
+import StudentsPage from './pages/StudentsPage';
 
-// Phase 0 placeholder. Router, layout and store arrive in later phases.
+// Phase 2: App = Layout + one page. Phase 7 adds React Router here.
 export default function App() {
   return (
-    <main className="app">
-      <h1>RedStarVibe — React client</h1>
-      <p>API: <code>{API_URL}</code></p>
-    </main>
+    <Layout appName="RedStarVibe">
+      <StudentsPage />
+    </Layout>
   );
 }
