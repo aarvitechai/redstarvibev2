@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Models;
 using Server.Api.Models.Dto;
@@ -9,11 +10,13 @@ namespace Server.Api.Controllers;
 [Route("api/[controller]")] // -> /api/students
 public class StudentsController(IStudentService students) : ControllerBase // primary-constructor DI
 {
-    // GET /api/students
+    // GET /api/students?search=comp
+    // Validation attributes work on query parameters too: a search term over 100 chars gets a 400.
     [HttpGet]
     [ProducesResponseType<ApiResponse<IReadOnlyList<StudentDto>>>(StatusCodes.Status200OK)]
-    public ActionResult<ApiResponse<IReadOnlyList<StudentDto>>> GetAll() =>
-        Ok(ApiResponse<IReadOnlyList<StudentDto>>.Ok(students.GetAll()));
+    [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status400BadRequest)]
+    public ActionResult<ApiResponse<IReadOnlyList<StudentDto>>> GetAll([FromQuery, StringLength(100)] string? search = null) =>
+        Ok(ApiResponse<IReadOnlyList<StudentDto>>.Ok(students.GetAll(search)));
 
     // GET /api/students/2  -> 200, or 404 with the envelope
     [HttpGet("{id:int}")]

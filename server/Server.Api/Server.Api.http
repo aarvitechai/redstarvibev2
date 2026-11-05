@@ -27,3 +27,7 @@ Content-Type: application/json
 DELETE {{Server.Api_HostAddress}}/api/students/4
 
 ###
+### Phase 4: search (name, email or course, case-insensitive)
+GET {{Server.Api_HostAddress}}/api/students?search=comp
+
+###

@@ -1,0 +1,32 @@
+<section id="directory">
+  <h2>Directory (live API)</h2>
+
+  <div class="toolbar">
+    <label>Search
+      <input #searchBox type="search" [value]="search()" (input)="onSearch($event)"
+             placeholder="name, email or course" maxlength="100" />
+    </label>
+    <label>Sort by
+      <select (change)="onSort($event)">
+        <option value="name" [selected]="sortBy() === 'name'">Name</option>
+        <option value="year" [selected]="sortBy() === 'year'">Year</option>
+      </select>
+    </label>
+  </div>
+
+  @let s = state();
+  <!-- The three states every async UI needs: loading, error, data -->
+  @if (s.error) {
+    <div role="alert" class="error">
+      Could not load students: {{ s.error }}
+      <button type="button" class="btn" (click)="reload()">Retry</button>
+    </div>
+  } @else {
+    <p class="stats" aria-live="polite">
+      {{ s.loading ? 'Loading…' : sorted().length + ' result' + (sorted().length === 1 ? '' : 's') }}
+    </p>
+    <div [attr.aria-busy]="s.loading" [style.opacity]="s.loading ? 0.6 : 1">
+      <app-student-list [students]="sorted()" [emptyMessage]="emptyMessage()" />
+    </div>
+  }
+</section>

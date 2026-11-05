@@ -15,7 +15,8 @@ public record StudentWriteResult(StudentDto? Student, StudentWriteError Error = 
 // Phase 11 swaps the in-memory version for an EF Core one without touching the controller.
 public interface IStudentService
 {
-    IReadOnlyList<StudentDto> GetAll();
+    // search: optional, case-insensitive match on name, email or course
+    IReadOnlyList<StudentDto> GetAll(string? search = null);
     StudentDto? GetById(int id);
     StudentWriteResult Create(CreateStudentDto input);
     StudentWriteResult Update(int id, UpdateStudentDto input);

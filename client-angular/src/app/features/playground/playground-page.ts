@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Counter } from './counter';
 import { KeysDemo } from './keys-demo';
+import { Timer } from './timer';
 
-// Phase 3 learning demos. Phase 7 moves this to its own route.
+// Phase 3 and 4 learning demos. Phase 7 moves this to its own route.
 @Component({
   selector: 'app-playground-page',
-  imports: [Counter, KeysDemo],
+  imports: [Counter, KeysDemo, Timer],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section id="playground">
@@ -14,6 +15,8 @@ import { KeysDemo } from './keys-demo';
       <app-counter />
       <h3>Tracking: $index vs id</h3>
       <app-keys-demo />
+      <h3>Timer: effect() cleanup</h3>
+      <app-timer />
     </section>
   `,
 })

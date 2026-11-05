@@ -1,0 +1,12 @@
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+.toolbar label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8125rem; color: var(--muted); flex: 1 1 200px; }
+.toolbar input, .toolbar select {
+  font: inherit; color: var(--text); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; min-width: 0;
+}
+.stats { color: var(--muted); }
+.error { color: var(--primary); border: 1px solid var(--primary); border-radius: var(--radius); padding: 12px; }
+.btn {
+  font: inherit; font-size: 0.8125rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+}

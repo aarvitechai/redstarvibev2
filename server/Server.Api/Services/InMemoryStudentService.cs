@@ -18,9 +18,18 @@ public class InMemoryStudentService : IStudentService
     private int _nextId = 5;
 
     // Return a COPY: callers must never be able to change our internal list.
-    public IReadOnlyList<StudentDto> GetAll()
+    public IReadOnlyList<StudentDto> GetAll(string? search = null)
     {
-        lock (_gate) return [.. _students];
+        var term = search?.Trim();
+        lock (_gate)
+        {
+            if (string.IsNullOrEmpty(term)) return [.. _students];
+
+            return [.. _students.Where(s =>
+                s.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                s.Email.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                s.Course.Contains(term, StringComparison.OrdinalIgnoreCase))];
+        }
     }
 
     public StudentDto? GetById(int id)

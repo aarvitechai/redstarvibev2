@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders as render } from './renderWithProviders';
 import { describe, expect, it } from 'vitest';
 import Layout from '../components/layout/Layout';
 
