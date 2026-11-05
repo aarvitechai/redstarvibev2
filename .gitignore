@@ -1,0 +1,24 @@
+# .NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.trx
+appsettings.*.local.json
+
+# Node (each client also has its own .gitignore)
+node_modules/
+dist/
+.angular/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
