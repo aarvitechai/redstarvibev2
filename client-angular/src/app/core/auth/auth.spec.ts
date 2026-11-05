@@ -60,6 +60,11 @@ function respond(req: TestRequest) {
     }
     return req.flush(ok({ students: 4, contacts: 3, products: 11, categories: 4 }));
   }
+  // The real API returns a PAGE for products, never a bare array. Answering [] here made the product list read
+  // `items.length` on undefined after a redirect to /products: an unhandled error that the passing tests hid.
+  if (url === `${API}/products`) {
+    return req.flush(ok({ items: [], page: 1, pageSize: 12, totalCount: 0, totalPages: 0, hasNext: false, hasPrevious: false }));
+  }
   req.flush(ok([]));
 }
 

@@ -17,7 +17,8 @@
     "db:script": "dotnet ef migrations script --idempotent --project server/Server.Api -o artifacts/migrate.sql",
     "docker:up": "docker compose up --build -d",
     "docker:down": "docker compose down",
-    "audit": "dotnet list server/Server.slnx package --vulnerable --include-transitive && npm --prefix client-react audit --omit=dev && npm --prefix client-angular audit --omit=dev"
+    "audit": "dotnet list server/Server.slnx package --vulnerable --include-transitive && npm --prefix client-react audit --omit=dev && npm --prefix client-angular audit --omit=dev",
+    "drill": "node scripts/drill.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.5"

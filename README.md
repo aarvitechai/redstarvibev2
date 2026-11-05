@@ -26,6 +26,7 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 13: Orders and Ratings (Project 8)](docs/phase-13-orders-ratings.md)
 - [Phase 14: Capstone – Admin app, polish, one-command run (Projects 9 and 10)](docs/phase-14-capstone.md)
 - [Phase 15: Production Hardening (security headers, health, compression, Docker, CI)](docs/phase-15-production-hardening.md)
+- [Phase 16: Interview Readiness (Q&A, scenario drills, walkthrough, mock interviews)](docs/phase-16-interview/README.md): `npm run drill`
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).
