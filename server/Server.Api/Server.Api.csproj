@@ -14,6 +14,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.14" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.18.7" />
+    <!-- Pinned: SqlClient pulls vulnerable 9.0.11 transitively (GHSA-846f-f764-76mx). Remove once SqlClient ships a fixed dependency. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 
 </Project>

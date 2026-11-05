@@ -10,6 +10,9 @@ Built one feature at a time, in three projects:
 
 The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.md).
 
+## Phase guides
+- [Phase 1: Modern JavaScript (JS / TS / C#)](docs/phase-01-modern-js.md)
+
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).
 
@@ -28,6 +31,7 @@ cd client-angular && npm install && npm start
 ## Test
 ```bash
 cd server && dotnet test
+cd client-react && npx vitest run
 cd client-angular && npm test -- --watch=false
 ```
 
