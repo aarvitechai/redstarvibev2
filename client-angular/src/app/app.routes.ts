@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { ROLES, authGuard, guestOnlyGuard, roleGuard } from './core/auth/auth';
 import { HomePage } from './features/home/home-page';
 
 const t = (page: string) => `${page} · RedStarVibe`;
@@ -21,6 +22,23 @@ export const routes: Routes = [
   { path: 'directory', loadComponent: () => import('./features/directory/directory-page').then((m) => m.DirectoryPage), title: t('Directory') },
   { path: 'contacts', loadComponent: () => import('./features/contacts/contacts-page').then((m) => m.ContactsPage), title: t('Contacts') },
   { path: 'playground', loadComponent: () => import('./features/playground/playground-page').then((m) => m.PlaygroundPage), title: t('Playground') },
+  // Phase 8: auth. Guards are UX ONLY: the API refuses unauthorised calls with 401/403 regardless.
+  { path: 'login', canActivate: [guestOnlyGuard], loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage), title: t('Log in') },
+  { path: 'unauthorized', loadComponent: () => import('./features/auth/unauthorized-page').then((m) => m.UnauthorizedPage), title: t('Not allowed') },
+  {
+    path: 'account',
+    canActivate: [authGuard],
+    runGuardsAndResolvers: 'always', // re-check on a same-URL reload (after logout or expiry)
+    loadComponent: () => import('./features/auth/account-page').then((m) => m.AccountPage),
+    title: t('Account'),
+  },
+  {
+    path: 'admin',
+    canActivate: [roleGuard(ROLES.admin)],
+    runGuardsAndResolvers: 'always',
+    loadComponent: () => import('./features/auth/admin-page').then((m) => m.AdminPage),
+    title: t('Admin'),
+  },
   // The catch-all. Order matters: the router takes the FIRST match, so '**' must be last.
   { path: '**', loadComponent: () => import('./features/home/not-found').then((m) => m.NotFound), title: t('Page not found') },
 ];

@@ -57,3 +57,20 @@ GET {{Server.Api_HostAddress}}/api/products?category=pizza&sort=priceDesc
 GET {{Server.Api_HostAddress}}/api/products/4
 
 ###
+### Phase 8: demo login (Development only). Copy accessToken into @token below.
+POST {{Server.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "admin@redstar.dev", "password": "Admin@123" }
+
+###
+@token = paste-accessToken-here
+
+GET {{Server.Api_HostAddress}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### 200 for admin, 403 for asha@redstar.dev, 401 with no token
+GET {{Server.Api_HostAddress}}/api/admin/summary
+Authorization: Bearer {{token}}
+
+###

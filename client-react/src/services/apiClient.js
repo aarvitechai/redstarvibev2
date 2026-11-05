@@ -62,7 +62,9 @@ apiClient.interceptors.response.use(
     }
 
     const apiError = toApiError(error.response);
-    if (apiError.status === 401) notifyUnauthorized(apiError); // ONE place handles "session expired"
+    // ONE place handles "session expired". Only when we SENT a token: a wrong password at login is also a 401,
+    // and it must not trigger a logout/redirect.
+    if (apiError.status === 401 && error.config?.headers?.has?.('Authorization')) notifyUnauthorized(apiError);
     throw apiError;
   },
 );

@@ -47,7 +47,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     timeout(environment.apiTimeoutMs),
     catchError((err: unknown) => {
       const apiError = toApiError(err);
-      if (apiError.status === 401) session.notifyUnauthorized(apiError);
+      // Only when we SENT a token: a wrong password at login is also a 401, and must not log anyone out
+      if (apiError.status === 401 && req.headers.has('Authorization')) session.notifyUnauthorized(apiError);
       return throwError(() => apiError);
     }),
   );

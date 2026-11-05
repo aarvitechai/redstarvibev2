@@ -74,12 +74,22 @@ describe('error interceptor', () => {
   it('notifies the session on 401 (one place for "session expired")', async () => {
     const seen: ApiError[] = [];
     TestBed.inject(Session).unauthorized$.subscribe((e) => seen.push(e));
+    TestBed.inject(Session).setAccessToken('expired.token'); // only a request that CARRIED a token counts
 
     const result = firstValueFrom(client.get(`${API}/contacts`));
     http.expectOne(`${API}/contacts`).flush({ success: false, data: null, errors: ['Unauthorized'] }, { status: 401, statusText: 'Unauthorized' });
     await result.catch(() => {});
 
     expect(seen.map((e) => e.status)).toEqual([401]);
+  });
+
+  it('does NOT treat a 401 without a token (e.g. a wrong password) as "session expired"', async () => {
+    const seen: ApiError[] = [];
+    TestBed.inject(Session).unauthorized$.subscribe((e) => seen.push(e));
+    const result = firstValueFrom(client.post(`${API}/auth/login`, {}));
+    http.expectOne(`${API}/auth/login`).flush({ success: false, data: null, errors: ['Invalid email or password.'] }, { status: 401, statusText: 'Unauthorized' });
+    await result.catch(() => {});
+    expect(seen).toEqual([]);
   });
 
   it('times out a hung request and cancels it', async () => {

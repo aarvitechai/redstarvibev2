@@ -1,0 +1,38 @@
+.login { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.login h1 { margin: 0; }
+.muted { color: var(--muted); }
+.error { color: var(--primary); }
+.code { font-size: 4rem; font-weight: 800; line-height: 1; color: var(--primary); margin: 0; }
+.demo { color: var(--muted); font-size: 0.875rem; }
+.demo ul { padding-left: 18px; }
+
+.form {
+  display: grid; gap: 12px; margin: 12px 0;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 0.8125rem; color: var(--muted); }
+.field input {
+  font: inherit; color: var(--text); background: var(--bg); min-width: 0;
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px;
+}
+.form-error { color: var(--primary); font-size: 0.8125rem; margin: 0; }
+
+.panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 24px; margin-top: 12px;
+}
+.panel h2 { font-size: 1.1rem; }
+.cards { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.card {
+  display: flex; flex-direction: column; gap: 6px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.big { font-size: 1.5rem; }
+
+.btn, .primary, .primary-link {
+  font: inherit; font-size: 0.875rem; padding: 6px 12px; border-radius: 8px; cursor: pointer; text-decoration: none;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text); justify-self: start; align-self: flex-start;
+}
+.primary, .primary-link { background: var(--primary); color: var(--primary-contrast); border-color: var(--primary); }
+.btn:disabled, .primary:disabled { opacity: 0.5; cursor: not-allowed; }

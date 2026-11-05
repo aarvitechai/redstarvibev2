@@ -20,14 +20,18 @@ public interface IContactService
 
 // In memory and thread-safe (singleton), like the student service. EF Core replaces it in Phase 11.
 // TimeProvider is injected instead of calling DateTimeOffset.UtcNow directly, so tests can control "now".
-public class InMemoryContactService(TimeProvider clock) : IContactService
+// ONE public constructor on purpose: with two, DI picks the one with the most resolvable parameters, which
+// silently skipped seeding once TimeProvider was registered (Phase 8).
+public class InMemoryContactService : IContactService
 {
     private readonly Lock _gate = new();
     private readonly List<ContactDto> _contacts = [];
+    private readonly TimeProvider clock;
     private int _nextId = 1;
 
-    public InMemoryContactService() : this(TimeProvider.System)
+    public InMemoryContactService(TimeProvider clock)
     {
+        this.clock = clock;
         Seed("Asha Verma", "asha@example.com", "+91 98765 43210", isFavourite: true);
         Seed("Ravi Kumar", "ravi@example.com", null, isFavourite: false);
         Seed("Meera Shah", "meera@example.com", "022 2345 6789", isFavourite: false);

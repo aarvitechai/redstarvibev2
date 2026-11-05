@@ -66,6 +66,7 @@ describe('apiClient: response interceptor', () => {
     mockFetch(() => fail(401, 'Unauthorized'));
     const listener = vi.fn();
     const unsubscribe = onUnauthorized(listener);
+    setAccessToken('expired.token'); // only a request that CARRIED a token means "the session expired"
 
     await request('/contacts').catch(() => {});
     unsubscribe();
@@ -73,6 +74,15 @@ describe('apiClient: response interceptor', () => {
 
     expect(listener).toHaveBeenCalledTimes(1); // the second call came after unsubscribe
     expect(listener.mock.calls[0][0]).toMatchObject({ status: 401 });
+  });
+
+  it('does NOT treat a 401 without a token (e.g. a wrong password) as "session expired"', async () => {
+    mockFetch(() => fail(401, 'Invalid email or password.'));
+    const listener = vi.fn();
+    const unsubscribe = onUnauthorized(listener);
+    await request('/auth/login', { method: 'POST', body: {} }).catch(() => {});
+    unsubscribe();
+    expect(listener).not.toHaveBeenCalled();
   });
 
   it('turns a dead connection into a friendly network error', async () => {

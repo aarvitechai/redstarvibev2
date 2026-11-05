@@ -18,6 +18,7 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 5: Forms and React 19 Actions (Project 2: Contact List)](docs/phase-05-forms-and-actions.md)
 - [Phase 6: Axios Service Layer](docs/phase-06-axios-service-layer.md)
 - [Phase 7: Routing (Project 3: Product Filter)](docs/phase-07-routing.md)
+- [Phase 8: Client-Side Auth](docs/phase-08-client-side-auth.md)
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).
@@ -44,4 +45,12 @@ cd client-angular && npm test -- --watch=false
 ## Config and secrets
 - Dev connection string: `server/Server.Api/appsettings.Development.json`. It uses Windows auth, so it holds no password.
 - CORS origins: `Cors:AllowedOrigins` in appsettings, or override with env vars such as `Cors__AllowedOrigins__0`.
+- Demo auth (Phase 8, Development only): `Auth:DemoTokensEnabled` in `appsettings.Development.json`. Accounts: `admin@redstar.dev` / `Admin@123`, `asha@redstar.dev` / `Customer@123`.
 - JWT key (Phase 12): kept in `dotnet user-secrets`, never in Git.
+
+## Committing a phase
+```bash
+git add -A          # NEW files too (git commit -am skips them)
+git commit -m "Phase N: ..."
+git status          # must say: nothing to commit, working tree clean
+```

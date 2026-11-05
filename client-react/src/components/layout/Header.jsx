@@ -1,5 +1,7 @@
 import { Link, NavLink } from 'react-router';
+import { ROLES } from '../../constants/roles';
 import { ROUTES } from '../../constants/routes';
+import { useAuth } from '../../context/authContext';
 import ThemeToggle from './ThemeToggle';
 import styles from './Layout.module.css';
 
@@ -13,17 +15,30 @@ const NAV = [
 
 // <NavLink> = <Link> that knows when it's ACTIVE: it adds aria-current="page" and lets className be a function.
 // <Link> changes the URL WITHOUT a page reload: React swaps the matching route and keeps all app state.
+// Role-based UI: show only the links this user can use. That's a CONVENIENCE: the API still checks every call.
 export default function Header({ appName }) {
+  const { user, hasRole, logout } = useAuth();
+  const links = [
+    ...NAV,
+    ...(user ? [{ to: ROUTES.account, label: 'Account' }] : []),
+    ...(hasRole(ROLES.admin) ? [{ to: ROUTES.admin, label: 'Admin' }] : []),
+  ];
+
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link to={ROUTES.home} className={styles.brand}>{appName}</Link>
         <nav aria-label="Main">
-          {NAV.map(({ to, label }) => (
+          {links.map(({ to, label }) => (
             <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.navLinkActive : styles.navLink)}>
               {label}
             </NavLink>
           ))}
+          {user ? (
+            <button type="button" className={styles.navButton} onClick={logout}>Log out ({user.name.split(' ')[0]})</button>
+          ) : (
+            <NavLink to={ROUTES.login} className={({ isActive }) => (isActive ? styles.navLinkActive : styles.navLink)}>Log in</NavLink>
+          )}
           <ThemeToggle />
         </nav>
       </div>

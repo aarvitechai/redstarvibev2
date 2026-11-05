@@ -1,5 +1,11 @@
 import { Route, Routes } from 'react-router';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
+import { ROLES } from './constants/roles';
+import AccountPage from './pages/auth/AccountPage';
+import AdminPage from './pages/auth/AdminPage';
+import LoginPage from './pages/auth/LoginPage';
+import UnauthorizedPage from './pages/auth/UnauthorizedPage';
 import ContactsPage from './pages/ContactsPage';
 import DirectoryPage from './pages/DirectoryPage';
 import HomePage from './pages/HomePage';
@@ -17,6 +23,9 @@ import StudentsPage from './pages/StudentsPage';
 //         (index)       ProductListPage    ?category=&q=&sort=
 //         :id           ProductDetailPage
 //     ...
+//     /login, /unauthorized       public
+//     /account          ProtectedRoute (any logged-in user)
+//     /admin            ProtectedRoute roles=[Admin]
 //     *                 NotFoundPage (catch-all: must be the last resort)
 export function AppRoutes() {
   return (
@@ -31,6 +40,17 @@ export function AppRoutes() {
         <Route path="directory" element={<DirectoryPage />} />
         <Route path="contacts" element={<ContactsPage />} />
         <Route path="playground" element={<PlaygroundPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="unauthorized" element={<UnauthorizedPage />} />
+
+        {/* Phase 8: pathless LAYOUT routes that guard their children */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="account" element={<AccountPage />} />
+        </Route>
+        <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
+          <Route path="admin" element={<AdminPage />} />
+        </Route>
+
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

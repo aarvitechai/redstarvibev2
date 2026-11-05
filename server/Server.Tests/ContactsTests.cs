@@ -18,13 +18,14 @@ public class ContactServiceTests
 
         var result = service.Create(new SaveContactDto("  Neha  ", " neha@example.com ", "   "));
 
-        Assert.Equal(new ContactDto(1, "Neha", "neha@example.com", null, false, clock.GetUtcNow()), result.Contact);
+        // ids 1-3 are the seeded demo contacts
+        Assert.Equal(new ContactDto(4, "Neha", "neha@example.com", null, false, clock.GetUtcNow()), result.Contact);
     }
 
     [Fact]
     public void GetAll_FavouritesFirst_ThenByName()
     {
-        var service = new InMemoryContactService(); // seeded: Asha (fav), Ravi, Meera
+        var service = new InMemoryContactService(TimeProvider.System); // seeded: Asha (fav), Ravi, Meera
         Assert.Equal(["Asha Verma", "Meera Shah", "Ravi Kumar"], service.GetAll().Select(c => c.Name));
 
         service.SetFavourite(2, true); // Ravi
@@ -34,7 +35,7 @@ public class ContactServiceTests
     [Fact]
     public void Update_KeepsIdAndCreatedAt()
     {
-        var service = new InMemoryContactService();
+        var service = new InMemoryContactService(TimeProvider.System);
         var before = service.GetAll().Single(c => c.Id == 2);
 
         var after = service.Update(2, new SaveContactDto("Ravi K", "ravi@example.com", "12345678", true)).Contact!;

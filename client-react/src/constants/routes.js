@@ -6,6 +6,10 @@ export const ROUTES = {
   contacts: '/contacts',
   products: '/products',
   playground: '/playground',
+  login: '/login',
+  account: '/account',
+  admin: '/admin',
+  unauthorized: '/unauthorized',
 };
 
 export const productPath = (id) => `${ROUTES.products}/${id}`;

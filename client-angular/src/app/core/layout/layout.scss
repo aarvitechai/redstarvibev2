@@ -10,6 +10,8 @@ nav { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; }
 .nav-link:hover { color: var(--primary); }
 .nav-link.active { color: var(--primary); font-weight: 700; border-bottom: 2px solid var(--primary); }
 .brand { text-decoration: none; }
+.nav-button { font: inherit; font-weight: 500; background: none; border: 0; padding: 0; cursor: pointer; color: var(--text); }
+.nav-button:hover { color: var(--primary); }
 
 .main { flex: 1; max-width: 1080px; margin: 0 auto; padding: 24px 16px; width: 100%; }
 

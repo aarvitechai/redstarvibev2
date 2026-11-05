@@ -20,6 +20,8 @@ nav { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .navLink:hover { color: var(--primary); }
 .navLinkActive { color: var(--primary); text-decoration: none; font-weight: 700; border-bottom: 2px solid var(--primary); }
 .brand { text-decoration: none; }
+.navButton { font: inherit; font-weight: 500; background: none; border: 0; padding: 0; cursor: pointer; color: var(--text); }
+.navButton:hover { color: var(--primary); }
 nav { align-items: center; }
 .themeToggle {
   font: inherit; line-height: 1; padding: 6px 8px; border-radius: 8px; cursor: pointer;

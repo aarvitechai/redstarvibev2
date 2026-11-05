@@ -1,9 +1,10 @@
 using Scalar.AspNetCore;
+using Server.Api.Auth;
 using Server.Api.Middleware;
 using Server.Api.Models;
 using Server.Api.Services;
 
-// Later phases add: DbContext (11), Identity + JWT (12), order services (13).
+// Later phases add: DbContext (11), Identity + JWT replacing demo auth (12), order services (13).
 var builder = WebApplication.CreateBuilder(args);
 
 const string ClientCorsPolicy = "ClientCors";
@@ -18,6 +19,19 @@ builder.Services.AddControllers()
 builder.Services.AddSingleton<IStudentService, InMemoryStudentService>(); // in-memory until Phase 11 (EF Core)
 builder.Services.AddSingleton<IContactService, InMemoryContactService>(); // Phase 5
 builder.Services.AddSingleton<IProductCatalog, InMemoryProductCatalog>(); // Phase 7
+builder.Services.AddSingleton(TimeProvider.System); // "now" as a dependency, so tests can control time
+
+// Phase 8: DEMO authentication (unsigned tokens). Development only. Phase 12 replaces it with Identity + JWT.
+// Fail fast: never let a forgeable token scheme reach a real environment by accident.
+var demoAuthEnabled = builder.Configuration.GetValue<bool>("Auth:DemoTokensEnabled");
+if (demoAuthEnabled && !builder.Environment.IsDevelopment())
+    throw new InvalidOperationException("Auth:DemoTokensEnabled must only be true in Development.");
+builder.Services.AddSingleton(new DemoAuthSettings(demoAuthEnabled));
+// The scheme is ALWAYS registered: with the flag off it authenticates nobody, so [Authorize] answers 401
+// instead of crashing with "no authentication scheme" (a 500).
+builder.Services.AddAuthentication(DemoAuthHandler.SchemeName)
+    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DemoAuthHandler>(DemoAuthHandler.SchemeName, null);
+builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();   // used for non-API errors (e.g. 404 for an unknown route)
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // Phase 6: unhandled exceptions -> 500 envelope with a reference id
@@ -56,7 +70,9 @@ else
 
 app.UseHttpsRedirection();
 app.UseCors(ClientCorsPolicy);
-// app.UseAuthentication();  // Phase 12
+// AuthN ("who are you?") must run before AuthZ ("are you allowed?"), and both after CORS,
+// so a 401/403 still carries the CORS headers the browser needs in order to read it.
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
