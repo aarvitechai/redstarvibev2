@@ -1,0 +1,48 @@
+<section aria-labelledby="products-title">
+  <h1 id="products-title">{{ heading() }}</h1>
+
+  <div class="toolbar">
+    <label>Search
+      <input type="search" [value]="searchBox()" (input)="onSearch($event)" maxlength="100" placeholder="name or description" />
+    </label>
+    <label>Sort
+      <select (change)="onSort($event)">
+        @for (s of sorts; track s.value) {
+          <option [value]="s.value" [selected]="s.value === sortValue()">{{ s.label }}</option>
+        }
+      </select>
+    </label>
+    @if (hasFilters()) {
+      <button type="button" class="btn" (click)="clear()">Clear filters</button>
+    }
+  </div>
+
+  @if (unknownCategory()) {
+    <p role="alert" class="error">There is no category called "{{ category() }}".</p>
+  }
+
+  @let s = state();
+  @if (s.error) {
+    <div role="alert" class="error">Could not load products: {{ s.error }}</div>
+  } @else {
+    <p class="muted" aria-live="polite">
+      {{ s.loading ? 'Loading…' : s.products.length + ' product' + (s.products.length === 1 ? '' : 's') }}
+    </p>
+    <ul class="grid" aria-label="Products" [attr.aria-busy]="s.loading">
+      @for (p of s.products; track p.id) {
+        <li>
+          <!-- [state]: remembered by the router, read by the detail page for "Back to results" -->
+          <a class="card" [routerLink]="['/products', p.id]" [state]="{ from: currentUrl }">
+            <span class="badge">{{ p.categoryName }}</span>
+            <strong>{{ p.name }}</strong>
+            <span class="muted">{{ p.description }}</span>
+            <span class="price">{{ p.price | currency: 'INR' : 'symbol' : '1.2-2' : 'en-IN' }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+    @if (!s.loading && s.products.length === 0) {
+      <p class="muted">No products match these filters.</p>
+    }
+  }
+</section>
