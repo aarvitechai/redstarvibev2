@@ -6,7 +6,7 @@ import ThemeToggle from '../components/layout/ThemeToggle';
 import ThemeProvider from '../context/ThemeProvider';
 import MemoDemo from '../learning/phase-04/MemoDemo';
 import DirectoryPage from '../pages/DirectoryPage';
-import { mockFetch, ok } from './fetchMock';
+import { callDetails, mockFetch, ok } from './fetchMock';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -105,13 +105,14 @@ describe('DirectoryPage (live API, debounced search)', () => {
     act(() => vi.advanceTimersByTime(300));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
-    expect(fetchMock.mock.calls[1][0]).toContain('?search=comp');
+    expect((await callDetails(fetchMock, 1)).url).toContain('?search=comp');
   });
 
   it('shows an error with Retry when the API is down', async () => {
     vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new TypeError('Failed to fetch'))));
     render(<DirectoryPage />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load students: Failed to fetch');
+    // The Axios interceptor turns a failed connection into one friendly ApiError message
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load students: Network error: could not reach the server.');
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
   });
 });

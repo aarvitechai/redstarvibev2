@@ -1,3 +1,4 @@
+import ActivityBar from './ActivityBar';
 import Header from './Header';
 import Footer from './Footer';
 import styles from './Layout.module.css';
@@ -7,6 +8,7 @@ import styles from './Layout.module.css';
 export default function Layout({ appName = 'RedStarVibe', children }) {
   return (
     <div className={styles.shell}>
+      <ActivityBar />
       <Header appName={appName} />
       <main className={styles.main}>{children}</main>
       <Footer appName={appName} />

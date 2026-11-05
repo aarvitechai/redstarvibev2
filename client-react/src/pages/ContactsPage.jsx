@@ -4,6 +4,7 @@ import ContactFormAction from '../components/contacts/ContactFormAction';
 import ContactFormClassic from '../components/contacts/ContactFormClassic';
 import ContactItem from '../components/contacts/ContactItem';
 import { contactsApi } from '../services/contactsApi';
+import { isAbortError } from '../services/http';
 import styles from '../components/contacts/Contacts.module.css';
 
 // The same order as the API: favourites first, then by name
@@ -37,7 +38,7 @@ export default function ContactsPage() {
         setLoad({ loading: false, error: null });
       })
       .catch((error) => {
-        if (error.name !== 'AbortError') setLoad({ loading: false, error: error.message });
+        if (!isAbortError(error)) setLoad({ loading: false, error: error.message });
       });
     return () => controller.abort();
   }, []);

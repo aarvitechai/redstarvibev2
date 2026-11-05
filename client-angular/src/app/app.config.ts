@@ -1,13 +1,15 @@
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
+import { appInterceptors } from './core/http/interceptors';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withFetch()), // Phase 4: HttpClient, using the browser's fetch under the hood
+    // HttpClient on the browser's fetch, plus the Phase 6 interceptors (correlation id, auth, activity, errors)
+    provideHttpClient(withFetch(), withInterceptors(appInterceptors)),
   ],
 };

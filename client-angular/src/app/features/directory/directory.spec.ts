@@ -122,7 +122,7 @@ describe('DirectoryPage (RxJS pipeline)', () => {
     tick(300);
     http.expectOne(API).error(new ProgressEvent('error'), { status: 0 });
     fixture.detectChanges();
-    expect(el.querySelector('[role="alert"]')?.textContent).toContain('Could not load students: Failed to fetch');
+    expect(el.querySelector('[role="alert"]')?.textContent).toContain('Could not load students: Network error: could not reach the server.');
 
     (el.querySelector('[role="alert"] button') as HTMLButtonElement).click();
     tick(300);

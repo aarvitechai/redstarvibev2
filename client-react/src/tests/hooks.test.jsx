@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useStudents } from '../hooks/useStudents';
-import { fail, mockFetch, ok } from './fetchMock';
+import { callDetails, fail, mockFetch, ok } from './fetchMock';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -37,7 +37,7 @@ describe('useStudents (custom data hook)', () => {
     expect(result.current.loading).toBe(true);
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.students).toEqual([asha]);
-    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:5240/api/students?search=comp');
+    expect((await callDetails(fetchMock, 0)).url).toBe('http://localhost:5240/api/students?search=comp');
   });
 
   it('shows the server error message from the envelope', async () => {
@@ -54,21 +54,25 @@ describe('useStudents (custom data hook)', () => {
       url.includes('comp') ? { ...ok([asha]), delayMs: 10 } : { ...ok([]), delayMs: 100 },
     );
     const { result, rerender } = renderHook(({ q }) => useStudents(q), { initialProps: { q: 'co' } });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1)); // "co" is now really in flight
     rerender({ q: 'comp' });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     await new Promise((r) => setTimeout(r, 150)); // give the old request time to (not) land
 
-    expect(fetchMock.mock.calls[0][1].signal.aborted).toBe(true); // the old request was cancelled
+    const co = await callDetails(fetchMock, 0);
+    expect(co.url).toMatch(/search=co$/);
+    expect(co.signal.aborted).toBe(true); // the old request was cancelled mid-flight
     expect(result.current.students).toEqual([asha]); // the newest result wins
     expect(result.current.error).toBeNull(); // the AbortError is not shown as an error
   });
 
-  it('aborts on unmount (no state updates after the component is gone)', () => {
+  it('aborts on unmount (no state updates after the component is gone)', async () => {
     const fetchMock = mockFetch(() => ({ ...ok([]), delayMs: 1000 }));
     const { unmount } = renderHook(() => useStudents(''));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled()); // Axios sends asynchronously (after the interceptors)
     unmount();
-    expect(fetchMock.mock.calls[0][1].signal.aborted).toBe(true);
+    expect((await callDetails(fetchMock, 0)).signal.aborted).toBe(true);
   });
 
   it('reload() fetches again', async () => {

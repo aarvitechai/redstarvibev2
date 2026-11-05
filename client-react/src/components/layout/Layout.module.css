@@ -1,5 +1,15 @@
 /* CSS Modules: class names are scoped to this file, so .header here never clashes with another .header */
 .shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Phase 6: a thin animated bar across the top while any request is running */
+.activity {
+  position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 10; overflow: hidden;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  background-size: 50% 100%; background-repeat: no-repeat;
+  animation: slide 1s linear infinite;
+}
+@keyframes slide { from { background-position: -50% 0; } to { background-position: 150% 0; } }
+@media (prefers-reduced-motion: reduce) { .activity { animation: none; background: var(--primary); } }
 .inner { max-width: 1080px; margin: 0 auto; padding: 0 16px; width: 100%; }
 
 .header { background: var(--surface); border-bottom: 1px solid var(--border); }

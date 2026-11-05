@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isAbortError } from '../services/http';
 import { fetchStudents } from '../services/studentsApi';
 
 // A CUSTOM HOOK: a function whose name starts with "use" and that calls other hooks.
@@ -13,13 +14,13 @@ export function useStudents(search = '') {
 
   useEffect(() => {
     // RACE CONDITION: if "co" is slower than "comp", an old response could arrive LAST and overwrite the new one.
-    // Fix: abort the previous request in the cleanup, and ignore the AbortError it throws.
+    // Fix: abort the previous request in the cleanup, and ignore the cancellation error it throws.
     const controller = new AbortController();
 
     fetchStudents({ search, signal: controller.signal })
       .then((students) => setResult({ key: requestKey, students, error: null }))
       .catch((err) => {
-        if (err.name === 'AbortError') return; // cancelled on purpose: not a real error
+        if (isAbortError(err)) return; // cancelled on purpose: not a real error
         setResult({ key: requestKey, students: [], error: err.message });
       });
 

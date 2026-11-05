@@ -1,8 +1,9 @@
 using Scalar.AspNetCore;
+using Server.Api.Middleware;
 using Server.Api.Models;
 using Server.Api.Services;
 
-// Phase 0 baseline. Later phases add: DbContext (11), Identity + JWT (12), services (13).
+// Later phases add: DbContext (11), Identity + JWT (12), order services (13).
 var builder = WebApplication.CreateBuilder(args);
 
 const string ClientCorsPolicy = "ClientCors";
@@ -17,7 +18,8 @@ builder.Services.AddControllers()
 builder.Services.AddSingleton<IStudentService, InMemoryStudentService>(); // in-memory until Phase 11 (EF Core)
 builder.Services.AddSingleton<IContactService, InMemoryContactService>(); // Phase 5
 builder.Services.AddOpenApi();
-builder.Services.AddProblemDetails();   // consistent RFC 7807 error shape
+builder.Services.AddProblemDetails();   // used for non-API errors (e.g. 404 for an unknown route)
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // Phase 6: unhandled exceptions -> 500 envelope with a reference id
 builder.Services.AddHealthChecks();     // DB health check is added in Phase 11
 
 builder.Services.AddCors(options =>
@@ -25,12 +27,19 @@ builder.Services.AddCors(options =>
     options.AddPolicy(ClientCorsPolicy, policy =>
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              // Browsers hide response headers from JavaScript unless CORS EXPOSES them.
+              // Without this, the client interceptors couldn't read the correlation id.
+              .WithExposedHeaders(CorrelationIdMiddleware.HeaderName));
 });
 
 var app = builder.Build();
 
-// Middleware order matters: exception handler -> HTTPS -> CORS -> AuthN -> AuthZ -> endpoints
+// Middleware order matters:
+//   correlation id -> request log -> exception handler -> HTTPS -> CORS -> AuthN -> AuthZ -> endpoints
+// The correlation id comes FIRST, so even a crash's 500 response and its log lines carry the id.
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 

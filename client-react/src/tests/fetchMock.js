@@ -1,18 +1,27 @@
 import { vi } from 'vitest';
 
 // A fake fetch that behaves like the real one where it matters:
-//  - resolves with a real Response (status + JSON body)
+//  - accepts either fetch(url, init) or fetch(Request), which is what Axios's fetch adapter sends
+//  - resolves with a real Response (status + JSON body + headers)
 //  - rejects with an AbortError when the request's signal is aborted
-// `handler(url, init)` returns { status, body, delayMs } for each request. init has method and body.
+// `handler(url, { method, body, headers })` returns { status, body, delayMs, headers } for each request.
 export function mockFetch(handler) {
-  const fetchMock = vi.fn((url, init = {}) => {
-    const { signal } = init;
-    const { status = 200, body, delayMs = 0 } = handler(String(url), { method: 'GET', ...init });
+  const fetchMock = vi.fn(async (input, init = {}) => {
+    const isRequest = typeof input === 'object' && input !== null && 'url' in input;
+    const url = isRequest ? input.url : String(input);
+    const method = (isRequest ? input.method : init.method) ?? 'GET';
+    const headers = new Headers(isRequest ? input.headers : init.headers);
+    const body = isRequest ? (await input.clone().text()) || undefined : init.body;
+    const signal = init.signal ?? (isRequest ? input.signal : undefined);
+
+    const { status = 200, body: resBody, delayMs = 0, headers: resHeaders = {} } = handler(url, { method, body, headers });
+
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(
-        () => resolve(status === 204 ? new Response(null, { status }) : new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })),
-        delayMs,
-      );
+      if (signal?.aborted) return reject(new DOMException('The operation was aborted.', 'AbortError'));
+      const timer = setTimeout(() => {
+        const responseHeaders = { 'Content-Type': 'application/json', ...resHeaders };
+        resolve(status === 204 ? new Response(null, { status, headers: resHeaders }) : new Response(JSON.stringify(resBody), { status, headers: responseHeaders }));
+      }, delayMs);
       signal?.addEventListener('abort', () => {
         clearTimeout(timer);
         reject(new DOMException('The operation was aborted.', 'AbortError'));
@@ -23,5 +32,20 @@ export function mockFetch(handler) {
   return fetchMock;
 }
 
+// Read what a recorded call sent, whichever form fetch was called with
+export async function callDetails(fetchMock, index) {
+  const [input, init = {}] = fetchMock.mock.calls[index];
+  const isRequest = typeof input === 'object' && 'url' in input;
+  return {
+    url: isRequest ? input.url : String(input),
+    method: (isRequest ? input.method : init.method) ?? 'GET',
+    headers: new Headers(isRequest ? input.headers : init.headers),
+    signal: init.signal ?? (isRequest ? input.signal : undefined),
+  };
+}
+
 export const ok = (data) => ({ status: 200, body: { success: true, data, errors: [] } });
-export const fail = (status, message) => ({ status, body: { success: false, data: null, errors: [message] } });
+export const fail = (status, message, fieldErrors) => ({
+  status,
+  body: { success: false, data: null, errors: [message], fieldErrors: fieldErrors ?? null },
+});

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ActivityBar } from './activity-bar';
 import { Footer } from './footer';
 import { Header } from './header';
 
@@ -7,10 +8,11 @@ import { Header } from './header';
 // Phase 7 replaces it with <router-outlet />.
 @Component({
   selector: 'app-layout',
-  imports: [Header, Footer],
+  imports: [ActivityBar, Header, Footer],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
+      <app-activity-bar />
       <app-header [appName]="appName()" />
       <main class="main"><ng-content /></main>
       <app-footer [appName]="appName()" />
