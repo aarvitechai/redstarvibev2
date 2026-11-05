@@ -4,6 +4,7 @@ import styles from './products/Products.module.css';
 
 const SECTIONS = [
   { to: ROUTES.products, title: 'Products', text: 'Project 3: filter by category, search and sort, all kept in the URL.' },
+  { to: ROUTES.destinations, title: 'Destinations', text: 'Project 5: RTK Query with caching, tags, paging and optimistic updates.' },
   { to: ROUTES.students, title: 'Students', text: 'Project 1: components, props, lifted state and a reducer.' },
   { to: ROUTES.directory, title: 'Directory', text: 'Phase 4: live API search with debouncing and cancellation.' },
   { to: ROUTES.contacts, title: 'Contacts', text: 'Project 2: forms three ways, Actions and optimistic updates.' },

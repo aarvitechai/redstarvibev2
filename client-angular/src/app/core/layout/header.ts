@@ -44,6 +44,7 @@ export class Header {
   protected readonly firstName = (name: string) => name.split(' ')[0];
   private readonly baseLinks = [
     { path: '/products', label: 'Products' },
+    { path: '/destinations', label: 'Destinations' },
     { path: '/students', label: 'Students' },
     { path: '/directory', label: 'Directory' },
     { path: '/contacts', label: 'Contacts' },

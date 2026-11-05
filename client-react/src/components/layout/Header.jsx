@@ -10,6 +10,7 @@ import styles from './Layout.module.css';
 
 const NAV = [
   { to: ROUTES.products, label: 'Products' },
+  { to: ROUTES.destinations, label: 'Destinations' },
   { to: ROUTES.students, label: 'Students' },
   { to: ROUTES.directory, label: 'Directory' },
   { to: ROUTES.contacts, label: 'Contacts' },

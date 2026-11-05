@@ -19,6 +19,7 @@ builder.Services.AddControllers()
 builder.Services.AddSingleton<IStudentService, InMemoryStudentService>(); // in-memory until Phase 11 (EF Core)
 builder.Services.AddSingleton<IContactService, InMemoryContactService>(); // Phase 5
 builder.Services.AddSingleton<IProductCatalog, InMemoryProductCatalog>(); // Phase 7
+builder.Services.AddSingleton<IDestinationService, InMemoryDestinationService>(); // Phase 10
 builder.Services.AddSingleton(TimeProvider.System); // "now" as a dependency, so tests can control time
 
 // Phase 8: DEMO authentication (unsigned tokens). Development only. Phase 12 replaces it with Identity + JWT.

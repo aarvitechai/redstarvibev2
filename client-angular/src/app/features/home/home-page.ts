@@ -23,6 +23,7 @@ import { RouterLink } from '@angular/router';
 export class HomePage {
   protected readonly sections = [
     { path: '/products', title: 'Products', text: 'Project 3: filter by category, search and sort, all kept in the URL.' },
+    { path: '/destinations', title: 'Destinations', text: 'Project 5: httpResource, refetch after changes, paging and optimistic updates.' },
     { path: '/students', title: 'Students', text: 'Project 1: components, inputs/outputs, lifted state and a reducer.' },
     { path: '/directory', title: 'Directory', text: 'Phase 4: live API search with debounceTime and switchMap.' },
     { path: '/contacts', title: 'Contacts', text: 'Project 2: Reactive Forms, a custom control and optimistic updates.' },

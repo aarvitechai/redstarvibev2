@@ -1,0 +1,76 @@
+<section aria-labelledby="destinations-title">
+  <h1 id="destinations-title">Destinations</h1>
+
+  @if (session.isAuthenticated()) {
+    <app-destination-form label="Add destination" submitLabel="Add destination" [save]="create" />
+  } @else {
+    <p class="muted"><a routerLink="/login" [queryParams]="{ returnUrl: '/destinations' }">Log in</a> to add or edit destinations.</p>
+  }
+
+  <div class="toolbar">
+    <label>Search
+      <input type="search" [value]="searchBox()" (input)="onSearch($event)" placeholder="name or country" maxlength="100" />
+    </label>
+    <label>Show
+      <select (change)="onVisitedFilter($event)">
+        <option value="" [selected]="query().visited === ''">All</option>
+        <option value="false" [selected]="query().visited === 'false'">Not visited yet</option>
+        <option value="true" [selected]="query().visited === 'true'">Visited</option>
+      </select>
+    </label>
+  </div>
+
+  @if (actionError()) { <p role="alert" class="error">{{ actionError() }}</p> }
+
+  @if (errorMessage()) {
+    <div role="alert" class="error">
+      Could not load destinations: {{ errorMessage() }}
+      <button type="button" class="btn" (click)="list.reload()">Retry</button>
+    </div>
+  } @else if (!data()) {
+    <p class="muted">Loading…</p>
+  } @else {
+    @let d = data()!;
+    <p class="muted" aria-live="polite">{{ range() }}@if (list.isLoading()) { · Updating… }</p>
+    <ul class="grid" aria-label="Destinations" [attr.aria-busy]="list.isLoading()">
+      @for (item of d.items; track item.id) {
+        @if (editingId() === item.id) {
+          <li class="card">
+            <app-destination-form [label]="'Edit ' + item.name" submitLabel="Save" [initial]="item" [cancellable]="true"
+                                  [save]="updateFor(item.id)" (saved)="editingId.set(null)" (cancelled)="editingId.set(null)" />
+          </li>
+        } @else {
+          <li class="card" [attr.aria-label]="item.name">
+            <span class="badge">{{ item.country }}</span>
+            <strong>{{ item.name }}</strong>
+            <span class="muted">{{ item.description }}</span>
+            <span [attr.aria-label]="'Rating ' + item.rating + ' of 5'">{{ stars(item.rating) }}</span>
+            <label class="check">
+              <input type="checkbox" [checked]="item.isVisited" [disabled]="!session.isAuthenticated()"
+                     (change)="toggleVisited(item, $any($event.target).checked)" />
+              Visited
+            </label>
+            @if (session.isAuthenticated()) {
+              <div class="actions">
+                @if (confirmingId() === item.id) {
+                  <button type="button" class="danger" (click)="remove(item.id)">Confirm delete</button>
+                  <button type="button" class="btn" (click)="confirmingId.set(null)">Keep</button>
+                } @else {
+                  <button type="button" class="btn" (click)="editingId.set(item.id)">Edit</button>
+                  <button type="button" class="btn" (click)="confirmingId.set(item.id)">Delete</button>
+                }
+              </div>
+            }
+          </li>
+        }
+      }
+    </ul>
+    @if (d.totalPages > 1) {
+      <nav class="pager" aria-label="Pagination">
+        <button type="button" class="btn" [disabled]="!d.hasPrevious" (click)="goTo(d.page - 1)">← Previous</button>
+        <span>Page {{ d.page }} of {{ d.totalPages }}</span>
+        <button type="button" class="btn" [disabled]="!d.hasNext" (click)="goTo(d.page + 1)">Next →</button>
+      </nav>
+    }
+  }
+</section>

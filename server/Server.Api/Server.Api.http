@@ -81,3 +81,7 @@ Content-Type: application/json
 { "items": [ { "productId": 1, "quantity": 2 }, { "productId": 7, "quantity": 3 } ] }
 
 ###
+### Phase 10: destinations (paged). Writes need: Authorization: Bearer {{token}}
+GET {{Server.Api_HostAddress}}/api/destinations?page=1&pageSize=6&search=india&visited=false
+
+###

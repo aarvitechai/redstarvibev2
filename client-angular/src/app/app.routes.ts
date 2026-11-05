@@ -22,6 +22,7 @@ export const routes: Routes = [
   { path: 'directory', loadComponent: () => import('./features/directory/directory-page').then((m) => m.DirectoryPage), title: t('Directory') },
   { path: 'contacts', loadComponent: () => import('./features/contacts/contacts-page').then((m) => m.ContactsPage), title: t('Contacts') },
   { path: 'playground', loadComponent: () => import('./features/playground/playground-page').then((m) => m.PlaygroundPage), title: t('Playground') },
+  { path: 'destinations', loadComponent: () => import('./features/destinations/destinations-page').then((m) => m.DestinationsPage), title: t('Destinations') },
   { path: 'cart', loadComponent: () => import('./features/cart/cart-page').then((m) => m.CartPage), title: t('Cart') },
   // Phase 8: auth. Guards are UX ONLY: the API refuses unauthorised calls with 401/403 regardless.
   { path: 'login', canActivate: [guestOnlyGuard], loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage), title: t('Log in') },

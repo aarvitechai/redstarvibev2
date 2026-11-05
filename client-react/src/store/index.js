@@ -3,16 +3,18 @@ import authReducer from './authSlice';
 import cartReducer from './cartSlice';
 import counterReducer from './counterSlice';
 import themeReducer from './themeSlice';
+import { baseApi } from './api/baseApi';
 
 // THE STORE: one object holding all app-wide client state.
 //   state = { counter, cart, theme, auth }
 // configureStore adds Redux DevTools support and dev-only checks (accidental mutations, non-serialisable values).
-// (Server data such as products moves to RTK Query in Phase 10.)
+// Phase 10: plus state.api, the RTK Query cache for server data.
 const rootReducer = combineReducers({
   counter: counterReducer,
   cart: cartReducer,
   theme: themeReducer,
   auth: authReducer,
+  [baseApi.reducerPath]: baseApi.reducer, // RTK Query's cache lives at state.api
 });
 
 const CART_KEY = 'redstar.cart';
@@ -29,7 +31,13 @@ export function loadCart() {
 // A FACTORY, not a single global store: each test gets a fresh store, and preloadedState lets a test start
 // from any state it needs.
 export function makeStore(preloadedState) {
-  return configureStore({ reducer: rootReducer, preloadedState });
+  return configureStore({
+    reducer: rootReducer,
+    preloadedState,
+    // REQUIRED for RTK Query: the middleware runs the requests, de-duplicates them, refetches after
+    // invalidation, and cleans up unused cache entries. Forgetting it (or api.reducer) is a classic mistake.
+    middleware: (getDefault) => getDefault().concat(baseApi.middleware),
+  });
 }
 
 // Save the cart whenever it changes ("cart survives reload"). Subscribing outside the reducers keeps them pure.

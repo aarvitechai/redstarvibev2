@@ -18,11 +18,7 @@ export const loginUser = createAsyncThunk('auth/login', async ({ email, password
   }
 });
 
-// A plain "thunk": a function the store calls with dispatch. Clears storage, then announces the logout.
-export const logout = (reason = null) => (dispatch) => {
-  saveSession(null);
-  dispatch(loggedOut(reason));
-};
+// The logout THUNK lives in store/sessionActions.js (it also clears the RTK Query cache).
 
 const authSlice = createSlice({
   name: 'auth',

@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, logout as logoutThunk, selectLogoutReason, selectUser } from '../store/authSlice';
+import { loginUser, selectLogoutReason, selectUser } from '../store/authSlice';
+import { logout as logoutThunk } from '../store/sessionActions';
 
 // The SAME API as Phase 8's Context version: { user, isAuthenticated, hasRole, logoutReason, login, logout }.
 // Components don't know (or care) that auth now lives in Redux. That's the benefit of a custom hook.

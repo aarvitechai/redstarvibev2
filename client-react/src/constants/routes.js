@@ -11,6 +11,7 @@ export const ROUTES = {
   admin: '/admin',
   unauthorized: '/unauthorized',
   cart: '/cart',
+  destinations: '/destinations',
 };
 
 export const productPath = (id) => `${ROUTES.products}/${id}`;

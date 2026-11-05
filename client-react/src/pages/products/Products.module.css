@@ -61,3 +61,7 @@
 /* Phase 9: card = link + add-to-cart button */
 .cardShell { display: flex; flex-direction: column; gap: 8px; }
 .cardShell > button { align-self: flex-start; }
+
+/* Phase 10: pagination */
+.pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0; flex-wrap: wrap; }
+.button:disabled { opacity: 0.5; cursor: not-allowed; }

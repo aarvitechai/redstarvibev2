@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { onUnauthorized } from '../../services/session';
-import { logout, selectSession } from '../../store/authSlice';
+import { selectSession } from '../../store/authSlice';
+import { logout } from '../../store/sessionActions';
 
 // The SIDE EFFECTS of auth, kept out of the reducers (which must stay pure):
 //  - log out exactly when the token expires
