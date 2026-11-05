@@ -4,6 +4,7 @@ import { PRODUCT_PARAMS, PRODUCT_SORTS, productPath } from '../../constants/rout
 import { useQuery } from '../../hooks/useQuery';
 import { productsApi } from '../../services/productsApi';
 import { formatPrice } from '../../utility/format';
+import AddToCartButton from '../../components/cart/AddToCartButton';
 import styles from './Products.module.css';
 
 // THE URL IS THE STATE. category, q and sort live in the query string, not in useState:
@@ -100,7 +101,7 @@ export default function ProductListPage() {
           </p>
           <ul className={styles.grid} aria-label="Products" aria-busy={products.loading}>
             {list.map((p) => (
-              <li key={p.id}>
+              <li key={p.id} className={styles.cardShell}>
                 {/* state: remember where we came from, so the detail page can link back to THESE results */}
                 <Link to={productPath(p.id)} state={{ from: `${location.pathname}${location.search}` }} className={styles.card}>
                   <span className={styles.badge}>{p.categoryName}</span>
@@ -108,6 +109,8 @@ export default function ProductListPage() {
                   <span className={styles.muted}>{p.description}</span>
                   <span className={styles.price}>{formatPrice(p.price)}</span>
                 </Link>
+                {/* Outside the <Link>: a button inside a link is invalid HTML and confusing for screen readers */}
+                <AddToCartButton product={p} />
               </li>
             ))}
           </ul>

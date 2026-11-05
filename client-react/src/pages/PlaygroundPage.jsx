@@ -2,8 +2,9 @@ import Counter from '../components/counter/Counter';
 import Timer from '../components/playground/Timer';
 import KeysDemo from '../learning/phase-03/KeysDemo';
 import MemoDemo from '../learning/phase-04/MemoDemo';
+import ReduxCounter from '../learning/phase-09/ReduxCounter';
 
-// Phase 3 and 4 learning demos, at /playground.
+// Phase 3, 4 and 9 learning demos, at /playground.
 export default function PlaygroundPage() {
   return (
     <section>
@@ -17,6 +18,11 @@ export default function PlaygroundPage() {
       <Timer />
       <h3>memo / useCallback: measure re-renders</h3>
       <MemoDemo />
+      <h3>Redux counter: two copies, one store</h3>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+        <ReduxCounter />
+        <ReduxCounter />
+      </div>
     </section>
   );
 }

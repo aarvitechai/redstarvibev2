@@ -5,6 +5,7 @@ import { Title } from '@angular/platform-browser';
 import { Router, RouterLink, UrlTree } from '@angular/router';
 import { catchError, map, of, startWith, switchMap } from 'rxjs';
 import { ApiError } from '../../core/http/api';
+import { AddToCartButton } from '../cart/add-to-cart-button';
 import { NotFound } from '../home/not-found';
 import { Product, ProductsApi } from './products-api';
 
@@ -17,7 +18,7 @@ type DetailState =
 // /products/:id. The :id route param arrives as an input (a STRING), so validate it before use.
 @Component({
   selector: 'app-product-detail',
-  imports: [RouterLink, CurrencyPipe, NotFound],
+  imports: [RouterLink, CurrencyPipe, NotFound, AddToCartButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let s = state();
@@ -35,6 +36,7 @@ type DetailState =
               <h1 id="product-title">{{ s.product.name }}</h1>
               <p>{{ s.product.description }}</p>
               <p class="price-large">{{ s.product.price | currency: 'INR' : 'symbol' : '1.2-2' : 'en-IN' }}</p>
+              <div><app-add-to-cart-button [product]="s.product" /></div>
             </div>
           }
         }

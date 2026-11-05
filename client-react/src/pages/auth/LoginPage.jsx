@@ -1,7 +1,7 @@
 import { useActionState } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import Field from '../../components/contacts/Field';
-import { useAuth } from '../../context/authContext';
+import { useAuth } from '../../hooks/useAuth';
 import { safeRedirect } from '../../utility/redirect';
 import styles from '../products/Products.module.css';
 import formStyles from '../../components/contacts/Contacts.module.css';

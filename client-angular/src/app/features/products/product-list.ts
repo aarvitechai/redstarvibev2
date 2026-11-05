@@ -5,6 +5,7 @@ import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { Subject, catchError, debounceTime, map, of, startWith, switchMap } from 'rxjs';
 import { ApiError } from '../../core/http/api';
+import { AddToCartButton } from '../cart/add-to-cart-button';
 import { PRODUCT_SORTS, Product, ProductSort, ProductsApi } from './products-api';
 
 interface ListState {
@@ -18,7 +19,7 @@ interface ListState {
 // Refresh, share the link, or press Back: you get the same results.
 @Component({
   selector: 'app-product-list',
-  imports: [RouterLink, CurrencyPipe],
+  imports: [RouterLink, CurrencyPipe, AddToCartButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './product-list.html',
   styleUrl: './products.scss',

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { CartStore } from '../../features/cart/cart-store';
 import { ROLES } from '../auth/auth';
 import { Session } from '../auth/session';
 import { ThemeToggle } from './theme-toggle';
@@ -20,6 +21,10 @@ import { ThemeToggle } from './theme-toggle';
           @for (link of links(); track link.path) {
             <a class="nav-link" [routerLink]="link.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ link.label }}</a>
           }
+          <a class="nav-link" routerLink="/cart" routerLinkActive="active" ariaCurrentWhenActive="page"
+             [attr.aria-label]="'Cart, ' + cart.count() + ' item' + (cart.count() === 1 ? '' : 's')">
+            Cart@if (cart.count() > 0) { <span class="badge">{{ cart.count() }}</span> }
+          </a>
           @if (session.user(); as u) {
             <button type="button" class="nav-button" (click)="session.logout()">Log out ({{ firstName(u.name) }})</button>
           } @else {
@@ -35,6 +40,7 @@ import { ThemeToggle } from './theme-toggle';
 export class Header {
   readonly appName = input.required<string>();
   protected readonly session = inject(Session);
+  protected readonly cart = inject(CartStore);
   protected readonly firstName = (name: string) => name.split(' ')[0];
   private readonly baseLinks = [
     { path: '/products', label: 'Products' },

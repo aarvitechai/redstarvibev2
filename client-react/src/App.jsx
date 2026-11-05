@@ -6,6 +6,7 @@ import AccountPage from './pages/auth/AccountPage';
 import AdminPage from './pages/auth/AdminPage';
 import LoginPage from './pages/auth/LoginPage';
 import UnauthorizedPage from './pages/auth/UnauthorizedPage';
+import CartPage from './pages/CartPage';
 import ContactsPage from './pages/ContactsPage';
 import DirectoryPage from './pages/DirectoryPage';
 import HomePage from './pages/HomePage';
@@ -40,6 +41,7 @@ export function AppRoutes() {
         <Route path="directory" element={<DirectoryPage />} />
         <Route path="contacts" element={<ContactsPage />} />
         <Route path="playground" element={<PlaygroundPage />} />
+        <Route path="cart" element={<CartPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="unauthorized" element={<UnauthorizedPage />} />
 

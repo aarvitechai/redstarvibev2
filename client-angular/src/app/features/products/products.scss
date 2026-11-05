@@ -49,3 +49,6 @@
   font: inherit; font-size: 0.875rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;
   border: 1px solid var(--border); background: var(--surface); color: var(--text);
 }
+
+/* Phase 9: card = link + add-to-cart button */
+.card-shell { display: flex; flex-direction: column; gap: 8px; }

@@ -74,3 +74,10 @@ GET {{Server.Api_HostAddress}}/api/admin/summary
 Authorization: Bearer {{token}}
 
 ###
+### Phase 9: price a cart on the server (prices come from the catalogue, never from the client)
+POST {{Server.Api_HostAddress}}/api/cart/price
+Content-Type: application/json
+
+{ "items": [ { "productId": 1, "quantity": 2 }, { "productId": 7, "quantity": 3 } ] }
+
+###

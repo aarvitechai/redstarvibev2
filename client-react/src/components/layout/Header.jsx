@@ -1,7 +1,10 @@
 import { Link, NavLink } from 'react-router';
 import { ROLES } from '../../constants/roles';
 import { ROUTES } from '../../constants/routes';
-import { useAuth } from '../../context/authContext';
+import { useSelector } from 'react-redux';
+import { useAuth } from '../../hooks/useAuth';
+import { selectCartCount } from '../../store/cartSlice';
+import cartStyles from '../cart/Cart.module.css';
 import ThemeToggle from './ThemeToggle';
 import styles from './Layout.module.css';
 
@@ -18,6 +21,7 @@ const NAV = [
 // Role-based UI: show only the links this user can use. That's a CONVENIENCE: the API still checks every call.
 export default function Header({ appName }) {
   const { user, hasRole, logout } = useAuth();
+  const cartCount = useSelector(selectCartCount); // the header re-renders only when the COUNT changes
   const links = [
     ...NAV,
     ...(user ? [{ to: ROUTES.account, label: 'Account' }] : []),
@@ -34,6 +38,10 @@ export default function Header({ appName }) {
               {label}
             </NavLink>
           ))}
+          <NavLink to={ROUTES.cart} className={({ isActive }) => (isActive ? styles.navLinkActive : styles.navLink)}
+            aria-label={`Cart, ${cartCount} item${cartCount === 1 ? '' : 's'}`}>
+            Cart{cartCount > 0 && <span className={cartStyles.badge}>{cartCount}</span>}
+          </NavLink>
           {user ? (
             <button type="button" className={styles.navButton} onClick={logout}>Log out ({user.name.split(' ')[0]})</button>
           ) : (

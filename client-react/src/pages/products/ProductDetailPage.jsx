@@ -4,6 +4,7 @@ import { useQuery } from '../../hooks/useQuery';
 import { productsApi } from '../../services/productsApi';
 import { formatPrice } from '../../utility/format';
 import NotFoundPage from '../NotFoundPage';
+import AddToCartButton from '../../components/cart/AddToCartButton';
 import styles from './Products.module.css';
 
 // /products/:id. useParams() gives the URL segments as STRINGS, so validate before use.
@@ -42,6 +43,7 @@ export default function ProductDetailPage() {
           <h1 id="product-title">{product.data.name}</h1>
           <p>{product.data.description}</p>
           <p className={styles.priceLarge}>{formatPrice(product.data.price)}</p>
+          <div><AddToCartButton product={product.data} /></div>
         </div>
       )}
     </article>

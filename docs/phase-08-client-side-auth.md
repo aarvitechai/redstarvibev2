@@ -13,7 +13,7 @@
 | Piece | React | Angular | Backend |
 | --- | --- | --- | --- |
 | Login | `pages/auth/LoginPage.jsx` (`useActionState`) | `features/auth/login-page.ts` (Reactive Forms) | `POST /api/auth/login` |
-| Session state | `context/AuthProvider.jsx` + `services/session.js` | `core/auth/session.ts` (signals) | — |
+| Session state | `context/AuthProvider.jsx` + `services/session.js` (moved to a Redux `authSlice` in Phase 9; `useAuth()` unchanged) | `core/auth/session.ts` (signals) | — |
 | HTTP | `services/authApi.js` | `core/auth/auth.ts` (`AuthService`) | `GET /api/auth/me`, `GET /api/admin/summary` |
 | Route protection | `components/auth/ProtectedRoute.jsx` | `authGuard`, `roleGuard(...)`, `guestOnlyGuard` | `[Authorize]` |
 | 403 page | `pages/auth/UnauthorizedPage.jsx` | `features/auth/unauthorized-page.ts` | 403 envelope |

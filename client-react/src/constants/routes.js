@@ -10,6 +10,7 @@ export const ROUTES = {
   account: '/account',
   admin: '/admin',
   unauthorized: '/unauthorized',
+  cart: '/cart',
 };
 
 export const productPath = (id) => `${ROUTES.products}/${id}`;

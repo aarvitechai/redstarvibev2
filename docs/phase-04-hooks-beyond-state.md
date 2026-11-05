@@ -12,7 +12,7 @@
 | Cancel stale requests | `AbortController` in the effect cleanup | `switchMap` | — |
 | Live page | `pages/DirectoryPage.jsx` | `features/directory/directory-page.ts` | — |
 | Timer + cleanup | `components/playground/Timer.jsx` | `features/playground/timer.ts` (`effect` + `onCleanup`) | — |
-| App-wide value | `context/ThemeProvider.jsx` + `useTheme()` | `core/theme/theme.service.ts` (DI singleton) | — |
+| App-wide value | `context/ThemeProvider.jsx` + `useTheme()` (moved to a Redux `themeSlice` in Phase 9) | `core/theme/theme.service.ts` (DI singleton) | — |
 | Memo demo | `learning/phase-04/MemoDemo.jsx` | (signals + OnPush cover this) | — |
 
 ## Concept map

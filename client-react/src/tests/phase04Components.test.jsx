@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import Timer from '../components/playground/Timer';
 import ThemeToggle from '../components/layout/ThemeToggle';
-import ThemeProvider from '../context/ThemeProvider';
 import MemoDemo from '../learning/phase-04/MemoDemo';
 import DirectoryPage from '../pages/DirectoryPage';
 import { callDetails, mockFetch, ok } from './fetchMock';
+import { renderWithProviders } from './renderWithProviders';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -39,20 +39,21 @@ describe('Timer (useEffect cleanup)', () => {
   });
 });
 
-describe('Theme (useContext)', () => {
-  it('toggles the theme and syncs it to <html data-theme>', async () => {
+describe('Theme (Phase 4: Context -> Phase 9: Redux themeSlice)', () => {
+  it('toggles the theme in the store and ThemeSync writes <html data-theme>', async () => {
     const user = userEvent.setup();
-    render(<ThemeProvider><ThemeToggle /></ThemeProvider>);
+    const { store } = renderWithProviders(<ThemeToggle />);
     expect(document.documentElement.dataset.theme).toBe('light'); // jsdom has no dark preference
 
     await user.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
+    expect(store.getState().theme.mode).toBe('dark');
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
   });
 
-  it('throws a clear error without a Provider', () => {
+  it('throws a clear error without the Redux <Provider>', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {}); // React logs the error; keep the output clean
-    expect(() => render(<ThemeToggle />)).toThrow('useTheme must be used inside <ThemeProvider>');
+    expect(() => render(<ThemeToggle />)).toThrow(/react-redux context value/);
   });
 });
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ROLES } from '../../constants/roles';
-import { useAuth } from '../../context/authContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useQuery } from '../../hooks/useQuery';
 import { adminApi, authApi } from '../../services/authApi';
 import styles from '../products/Products.module.css';

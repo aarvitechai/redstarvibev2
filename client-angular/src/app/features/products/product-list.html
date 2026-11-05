@@ -30,7 +30,7 @@
     </p>
     <ul class="grid" aria-label="Products" [attr.aria-busy]="s.loading">
       @for (p of s.products; track p.id) {
-        <li>
+        <li class="card-shell">
           <!-- [state]: remembered by the router, read by the detail page for "Back to results" -->
           <a class="card" [routerLink]="['/products', p.id]" [state]="{ from: currentUrl }">
             <span class="badge">{{ p.categoryName }}</span>
@@ -38,6 +38,8 @@
             <span class="muted">{{ p.description }}</span>
             <span class="price">{{ p.price | currency: 'INR' : 'symbol' : '1.2-2' : 'en-IN' }}</span>
           </a>
+          <!-- Outside the link: a button inside an <a> is invalid HTML -->
+          <app-add-to-cart-button [product]="p" />
         </li>
       }
     </ul>

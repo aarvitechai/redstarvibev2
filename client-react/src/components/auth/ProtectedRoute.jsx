@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { ROUTES } from '../../constants/routes';
-import { useAuth } from '../../context/authContext';
+import { useAuth } from '../../hooks/useAuth';
 
 // A LAYOUT ROUTE that guards its children:
 //   not logged in      -> /login, remembering where the user was going (state.from)
