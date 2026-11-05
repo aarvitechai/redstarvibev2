@@ -11,6 +11,7 @@ export default function Header({ appName }) {
           {/* Plain links for now; React Router <Link> replaces them in Phase 7 */}
           <a className={styles.navLink} href="#students">Students</a>
           <a className={styles.navLink} href="#directory">Directory</a>
+          <a className={styles.navLink} href="#contacts">Contacts</a>
           <a className={styles.navLink} href="#playground">Playground</a>
           <ThemeToggle />
         </nav>

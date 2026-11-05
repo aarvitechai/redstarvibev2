@@ -31,3 +31,19 @@ DELETE {{Server.Api_HostAddress}}/api/students/4
 GET {{Server.Api_HostAddress}}/api/students?search=comp
 
 ###
+### Phase 5: contacts
+GET {{Server.Api_HostAddress}}/api/contacts
+
+### Phase 5: create a contact (send an empty name / bad email to see fieldErrors)
+POST {{Server.Api_HostAddress}}/api/contacts
+Content-Type: application/json
+
+{ "name": "Neha Patel", "email": "neha@example.com", "phone": "+91 99999 11111" }
+
+### Phase 5: favourite
+PUT {{Server.Api_HostAddress}}/api/contacts/2/favourite
+Content-Type: application/json
+
+{ "isFavourite": true }
+
+###

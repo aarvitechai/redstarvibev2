@@ -1,5 +1,4 @@
 using Scalar.AspNetCore;
-using Microsoft.AspNetCore.Mvc;
 using Server.Api.Models;
 using Server.Api.Services;
 
@@ -12,21 +11,11 @@ const string ClientCorsPolicy = "ClientCors";
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
 builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        // [ApiController] returns 400 automatically when a DTO fails validation.
-        // Wrap those errors in our ApiResponse envelope so clients see ONE error shape everywhere.
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            var errors = context.ModelState
-                .Where(entry => entry.Value?.Errors.Count > 0)
-                .SelectMany(entry => entry.Value!.Errors.Select(e =>
-                    string.IsNullOrEmpty(entry.Key) ? e.ErrorMessage : $"{entry.Key}: {e.ErrorMessage}"))
-                .ToArray();
-            return new BadRequestObjectResult(ApiResponse<object>.Fail(errors));
-        };
-    });
+    // [ApiController] returns 400 automatically when a DTO fails validation.
+    // Wrap those errors in our ApiResponse envelope (with per-field errors) so clients see ONE error shape.
+    .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = ValidationResponses.InvalidModelState);
 builder.Services.AddSingleton<IStudentService, InMemoryStudentService>(); // in-memory until Phase 11 (EF Core)
+builder.Services.AddSingleton<IContactService, InMemoryContactService>(); // Phase 5
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();   // consistent RFC 7807 error shape
 builder.Services.AddHealthChecks();     // DB health check is added in Phase 11

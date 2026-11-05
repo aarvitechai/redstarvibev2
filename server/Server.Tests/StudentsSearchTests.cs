@@ -53,6 +53,6 @@ public class StudentSearchEndpointTests(WebApplicationFactory<Program> factory)
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
-        Assert.Contains(body!.Errors, e => e.StartsWith("search"));
+        Assert.True(body!.FieldErrors!.ContainsKey("search"));
     }
 }

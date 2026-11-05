@@ -47,10 +47,9 @@ public class StudentsWriteEndpointTests(WebApplicationFactory<Program> factory)
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
         Assert.False(body!.Success);
-        Assert.Contains(body.Errors, e => e.StartsWith("Name"));
-        Assert.Contains(body.Errors, e => e.StartsWith("Email"));
-        Assert.Contains(body.Errors, e => e.StartsWith("Course"));
-        Assert.Contains(body.Errors, e => e.StartsWith("Year"));
+        Assert.NotEmpty(body.Errors);
+        // Phase 5: errors are also grouped per field (camelCase), so forms can show them next to each input
+        Assert.Equal(["course", "email", "name", "year"], body.FieldErrors!.Keys.Order());
     }
 
     [Fact]

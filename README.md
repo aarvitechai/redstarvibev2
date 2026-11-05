@@ -15,6 +15,7 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 2: React Fundamentals (Project 1, part 1)](docs/phase-02-react-fundamentals.md)
 - [Phase 3: State and Events (Project 1, part 2)](docs/phase-03-state-and-events.md)
 - [Phase 4: Hooks Beyond State](docs/phase-04-hooks-beyond-state.md)
+- [Phase 5: Forms and React 19 Actions (Project 2: Contact List)](docs/phase-05-forms-and-actions.md)
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).

@@ -1,0 +1,33 @@
+<!-- [formGroup] + formControlName connect the template to the FormGroup in the class.
+     novalidate: turn off the browser's own popups, so our messages (and the server's) are shown instead. -->
+<form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate
+      [attr.aria-label]="isEdit ? 'Edit ' + contact()!.name : 'Add contact'">
+  @for (f of fields; track f.name) {
+    @let error = errorFor(f.name);
+    <div class="field">
+      <label [for]="idPrefix + f.name">{{ f.label }}</label>
+      <input [id]="idPrefix + f.name" [type]="f.type" [formControlName]="f.name"
+             [attr.aria-invalid]="error ? true : null"
+             [attr.aria-describedby]="error ? idPrefix + f.name + '-error' : null" />
+      @if (error) {
+        <small class="field-error" role="alert" [id]="idPrefix + f.name + '-error'">{{ error }}</small>
+      } @else if (f.hint) {
+        <small class="hint">{{ f.hint }}</small>
+      }
+    </div>
+  }
+  <div class="check">
+    <app-favourite-toggle formControlName="isFavourite" /> Favourite
+  </div>
+  @if (formError()) {
+    <p role="alert" class="form-error">{{ formError() }}</p>
+  }
+  <div class="actions">
+    <button type="submit" class="primary" [disabled]="submitting() || (isEdit && form.pristine)">
+      {{ submitting() ? 'Saving…' : isEdit ? 'Save' : 'Add contact' }}
+    </button>
+    @if (isEdit) {
+      <button type="button" class="btn" (click)="cancelled.emit()" [disabled]="submitting()">Cancel</button>
+    }
+  </div>
+</form>

@@ -5,7 +5,7 @@
 .header { background: var(--surface); border-bottom: 1px solid var(--border); }
 .header .inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
 .brand { font-weight: 700; font-size: 1.15rem; color: var(--primary); }
-nav { display: flex; gap: 16px; }
+nav { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .navLink { color: var(--text); text-decoration: none; font-weight: 500; }
 .navLink:hover { color: var(--primary); }
 nav { align-items: center; }

@@ -14,6 +14,7 @@ import { ThemeToggle } from './theme-toggle';
           <!-- Plain link for now; routerLink replaces it in Phase 7 -->
           <a class="nav-link" href="#students">Students</a>
           <a class="nav-link" href="#directory">Directory</a>
+          <a class="nav-link" href="#contacts">Contacts</a>
           <a class="nav-link" href="#playground">Playground</a>
           <app-theme-toggle />
         </nav>

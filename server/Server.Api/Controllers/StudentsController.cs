@@ -69,7 +69,7 @@ public class StudentsController(IStudentService students) : ControllerBase // pr
     private ActionResult ToErrorResponse(StudentWriteError error, string email, int? id = null) => error switch
     {
         StudentWriteError.NotFound => NotFound(ApiResponse<StudentDto>.Fail($"Student {id} not found")),
-        StudentWriteError.DuplicateEmail => Conflict(ApiResponse<StudentDto>.Fail($"Email '{email}' is already in use")),
+        StudentWriteError.DuplicateEmail => Conflict(ApiResponse<StudentDto>.FieldFail("email", $"Email '{email}' is already in use")),
         _ => throw new InvalidOperationException($"Unhandled error {error}"),
     };
 }
