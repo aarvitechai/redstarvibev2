@@ -1,0 +1,15 @@
+import Counter from '../components/counter/Counter';
+import KeysDemo from '../learning/phase-03/KeysDemo';
+
+// Phase 3 learning demos. Phase 7 moves this to its own route.
+export default function PlaygroundPage() {
+  return (
+    <section id="playground">
+      <h2>Playground</h2>
+      <h3>Counter: useState and functional updates</h3>
+      <Counter />
+      <h3>Keys: index vs id</h3>
+      <KeysDemo />
+    </section>
+  );
+}

@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { StudentCard } from './student-card';
 import { Student } from './student.model';
 
 // @for ... track s.id  ==  React's  .map(s => <X key={s.id} />)
-// track is REQUIRED in Angular. Always use a stable id, never $index, for dynamic lists.
+// track is REQUIRED in Angular. Always use a stable id, never $index, for dynamic lists (see the keys demo).
+// The list just passes card events up to its own parent ("event bubbling" through outputs).
 @Component({
   selector: 'app-student-list',
   imports: [StudentCard],
@@ -12,11 +13,13 @@ import { Student } from './student.model';
     @if (students().length > 0) {
       <ul class="grid">
         @for (s of students(); track s.id) {
-          <li><app-student-card [student]="s" /></li>
+          <li>
+            <app-student-card [student]="s" [editable]="editable()" (toggled)="toggled.emit($event)" (removed)="removed.emit($event)" />
+          </li>
         }
       </ul>
     } @else {
-      <p class="empty">No students yet.</p>
+      <p class="empty">{{ emptyMessage() }}</p>
     }
   `,
   styles: `
@@ -29,4 +32,8 @@ import { Student } from './student.model';
 })
 export class StudentList {
   readonly students = input.required<readonly Student[]>();
+  readonly editable = input(false);
+  readonly emptyMessage = input('No students yet.');
+  readonly toggled = output<number>();
+  readonly removed = output<number>();
 }

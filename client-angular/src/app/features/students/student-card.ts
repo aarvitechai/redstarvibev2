@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { Avatar } from './avatar';
 import { Card } from './card';
 import { Student } from './student.model';
 
-// input.required<Student>(): the parent MUST pass [student], or the compiler reports an error.
-// Inputs are read-only signals, so you can't assign to them. Data flows down, as with React props.
+// Data flows DOWN through input(); events flow UP through output().
+// The parent listens with (toggled)="..." and decides what changes. The card never changes the student itself.
 @Component({
   selector: 'app-student-card',
   imports: [Card, Avatar],
@@ -14,4 +14,8 @@ import { Student } from './student.model';
 })
 export class StudentCard {
   readonly student = input.required<Student>();
+  readonly editable = input(false); // show the action buttons only when the parent handles them
+
+  readonly toggled = output<number>(); // emits the student id (not "toggle": avoid native DOM event names)
+  readonly removed = output<number>();
 }

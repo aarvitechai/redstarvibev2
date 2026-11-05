@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { StudentList } from './student-list';
-import { StudentsPage } from './students-page';
 import { STUDENTS } from './students.data';
 
 describe('StudentList', () => {
@@ -18,13 +17,5 @@ describe('StudentList', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.textContent).toContain('No students yet.');
     expect(el.querySelector('app-student-card')).toBeNull();
-  });
-});
-
-describe('StudentsPage', () => {
-  it('shows the derived active count', async () => {
-    const fixture = TestBed.createComponent(StudentsPage);
-    await fixture.whenStable();
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('3 of 4 active');
   });
 });

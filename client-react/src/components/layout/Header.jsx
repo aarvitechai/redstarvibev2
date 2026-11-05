@@ -9,6 +9,7 @@ export default function Header({ appName }) {
         <nav aria-label="Main">
           {/* Plain links for now; React Router <Link> replaces them in Phase 7 */}
           <a className={styles.navLink} href="#students">Students</a>
+          <a className={styles.navLink} href="#playground">Playground</a>
         </nav>
       </div>
     </header>

@@ -25,3 +25,29 @@
 .badgeActive { background: var(--success-bg); color: var(--success); }
 .badgeInactive { background: var(--neutral-bg); color: var(--muted); }
 .empty { color: var(--muted); }
+
+/* Phase 3: actions, form, stats */
+.cardFoot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.actions { display: flex; gap: 8px; }
+.button, .dangerButton, .primaryButton {
+  font: inherit; font-size: 0.8125rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+}
+.button:hover { border-color: var(--text); }
+.dangerButton { color: var(--primary); }
+.dangerButton:hover { border-color: var(--primary); }
+.primaryButton { background: var(--primary); color: var(--primary-contrast); border-color: var(--primary); padding: 8px 14px; }
+.primaryButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.form {
+  display: grid; gap: 12px; align-items: end; margin: 16px 0;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
+}
+.form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8125rem; color: var(--muted); }
+.form input, .form select {
+  font: inherit; color: var(--text); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; min-width: 0;
+}
+.stats { color: var(--muted); }
+.stats strong { color: var(--text); }

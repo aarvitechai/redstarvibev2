@@ -11,6 +11,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         <nav aria-label="Main">
           <!-- Plain link for now; routerLink replaces it in Phase 7 -->
           <a class="nav-link" href="#students">Students</a>
+          <a class="nav-link" href="#playground">Playground</a>
         </nav>
       </div>
     </header>

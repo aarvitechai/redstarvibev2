@@ -38,3 +38,29 @@ describe('StudentCard', () => {
     expect(getInitials('Asha  Rani Verma')).toBe('AR');
   });
 });
+
+describe('StudentCard outputs', () => {
+  it('hides the buttons unless editable', async () => {
+    const el = await render(student);
+    expect(el.querySelector('button')).toBeNull();
+  });
+
+  it('emits the id on toggled and removed (events flow up)', async () => {
+    const fixture = TestBed.createComponent(StudentCard);
+    fixture.componentRef.setInput('student', student);
+    fixture.componentRef.setInput('editable', true);
+    const toggled: number[] = [];
+    const removed: number[] = [];
+    fixture.componentInstance.toggled.subscribe((id) => toggled.push(id));
+    fixture.componentInstance.removed.subscribe((id) => removed.push(id));
+    await fixture.whenStable();
+
+    const [toggleBtn, removeBtn] = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'));
+    expect(toggleBtn.textContent).toBe('Deactivate');
+    toggleBtn.click();
+    removeBtn.click();
+
+    expect(toggled).toEqual([1]);
+    expect(removed).toEqual([1]);
+  });
+});

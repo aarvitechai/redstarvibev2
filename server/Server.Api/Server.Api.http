@@ -11,3 +11,19 @@ GET {{Server.Api_HostAddress}}/api/students
 GET {{Server.Api_HostAddress}}/api/students/1
 
 ###
+### Phase 3: create (try the same email twice for a 409, or an invalid body for a 400)
+POST {{Server.Api_HostAddress}}/api/students
+Content-Type: application/json
+
+{ "name": "Neha Patel", "email": "neha@example.com", "course": "Civil", "year": 1 }
+
+### Phase 3: update
+PUT {{Server.Api_HostAddress}}/api/students/1
+Content-Type: application/json
+
+{ "name": "Asha Verma", "email": "asha@example.com", "course": "Computer Science", "year": 4, "isActive": true }
+
+### Phase 3: delete
+DELETE {{Server.Api_HostAddress}}/api/students/4
+
+###

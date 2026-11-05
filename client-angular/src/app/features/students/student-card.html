@@ -11,6 +11,15 @@
     <div><dt>Course</dt><dd>{{ s.course }}</dd></div>
     <div><dt>Year</dt><dd>{{ s.year }}</dd></div>
   </dl>
-  <!-- [class.x]="condition" toggles a class, like the className ternary in React -->
-  <span class="badge" [class.active]="s.isActive">{{ s.isActive ? 'Active' : 'Inactive' }}</span>
+  <div class="card-foot">
+    <!-- [class.x]="condition" toggles a class, like the className ternary in React -->
+    <span class="badge" [class.active]="s.isActive">{{ s.isActive ? 'Active' : 'Inactive' }}</span>
+    @if (editable()) {
+      <div class="actions">
+        <!-- (click) is event binding. The handler runs only on a click, unlike React's onClick={fn(id)} mistake -->
+        <button type="button" class="btn" (click)="toggled.emit(s.id)">{{ s.isActive ? 'Deactivate' : 'Activate' }}</button>
+        <button type="button" class="btn danger" (click)="removed.emit(s.id)">Remove</button>
+      </div>
+    }
+  </div>
 </app-card>

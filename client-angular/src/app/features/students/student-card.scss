@@ -11,3 +11,12 @@
   background: var(--neutral-bg); color: var(--muted);
 }
 .badge.active { background: var(--success-bg); color: var(--success); }
+.card-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.actions { display: flex; gap: 8px; }
+.btn {
+  font: inherit; font-size: 0.8125rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+}
+.btn:hover { border-color: var(--text); }
+.btn.danger { color: var(--primary); }
+.btn.danger:hover { border-color: var(--primary); }
