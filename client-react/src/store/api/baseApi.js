@@ -2,7 +2,8 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { API_TIMEOUT_MS, API_URL } from '../../constants/config';
 import { networkActivity } from '../../services/networkActivity';
 import { saveSession } from '../../services/session';
-import { loggedOut } from '../authSlice';
+import { refreshSession } from '../../services/tokenRefresh';
+import { loggedOut, sessionUpdated } from '../authSlice';
 
 // RTK QUERY: server data (lists, details) cached in the store, with loading flags, de-duplication and refetching
 // handled for you. Redux slices hold CLIENT state (cart, auth); RTK Query holds SERVER state.
@@ -41,12 +42,23 @@ function toError(error) {
 export const baseQuery = async (args, api, extraOptions) => {
   networkActivity.start();
   try {
-    const hadToken = Boolean(api.getState().auth.session?.accessToken);
-    const result = await rawBaseQuery(args, api, extraOptions);
+    const session = api.getState().auth.session;
+    let result = await rawBaseQuery(args, api, extraOptions);
+
+    // Phase 12: a 401 for a request that CARRIED a token usually means the 15-minute access token expired.
+    // Refresh ONCE (shared with any other request doing the same), then retry with the new token.
+    if (result.error?.status === 401 && session?.accessToken && session.refreshToken) {
+      try {
+        api.dispatch(sessionUpdated(await refreshSession())); // prepareHeaders now reads the NEW token
+        result = await rawBaseQuery(args, api, extraOptions);
+      } catch {
+        // the refresh failed too: fall through to the logout below
+      }
+    }
 
     if (result.error) {
       const error = toError(result.error);
-      if (error.status === 401 && hadToken) {
+      if (error.status === 401 && session?.accessToken) {
         saveSession(null);
         api.dispatch(loggedOut('expired'));
         api.dispatch(baseApi.util.resetApiState());

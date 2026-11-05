@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Server.Api.Auth;
 using Server.Api.Controllers;
 using Server.Api.Models;
 using Server.Api.Models.Dto;
@@ -60,7 +61,7 @@ public class DestinationsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
     private async Task<HttpClient> LoggedInClient()
     {
         var login = await _client.PostAsJsonAsync("/api/auth/login", new LoginDto("asha@redstar.dev", "Customer@123"));
-        var token = (await login.Content.ReadFromJsonAsync<ApiResponse<LoginResultDto>>())!.Data!.AccessToken;
+        var token = (await login.Content.ReadFromJsonAsync<ApiResponse<AuthResultDto>>())!.Data!.AccessToken;
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;

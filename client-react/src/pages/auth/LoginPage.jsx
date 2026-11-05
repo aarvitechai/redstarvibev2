@@ -1,5 +1,6 @@
 import { useActionState } from 'react';
-import { Navigate, useLocation } from 'react-router';
+import { Link, Navigate, useLocation } from 'react-router';
+import { ROUTES } from '../../constants/routes';
 import Field from '../../components/contacts/Field';
 import { useAuth } from '../../hooks/useAuth';
 import { safeRedirect } from '../../utility/redirect';
@@ -46,6 +47,8 @@ export default function LoginPage() {
         {state.error && <p role="alert" className={formStyles.formError}>{state.error}</p>}
         <button type="submit" className={formStyles.primary} disabled={pending}>{pending ? 'Logging in…' : 'Log in'}</button>
       </form>
+
+      <p className={styles.muted}>New here? <Link to={ROUTES.register} state={location.state}>Create an account</Link></p>
 
       <details className={styles.demo}>
         <summary>Demo accounts (development only)</summary>

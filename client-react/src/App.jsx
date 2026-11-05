@@ -5,6 +5,7 @@ import { ROLES } from './constants/roles';
 import AccountPage from './pages/auth/AccountPage';
 import AdminPage from './pages/auth/AdminPage';
 import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
 import UnauthorizedPage from './pages/auth/UnauthorizedPage';
 import CartPage from './pages/CartPage';
 import ContactsPage from './pages/ContactsPage';
@@ -45,6 +46,7 @@ export function AppRoutes() {
         <Route path="cart" element={<CartPage />} />
         <Route path="destinations" element={<DestinationsPage />} />
         <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
         <Route path="unauthorized" element={<UnauthorizedPage />} />
 
         {/* Phase 8: pathless LAYOUT routes that guard their children */}

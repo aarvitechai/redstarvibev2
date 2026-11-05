@@ -16,7 +16,7 @@ export interface AdminSummary {
   categories: number;
 }
 
-// The HTTP side of auth. Phase 12 keeps these URLs and response shapes (real JWTs inside).
+// The HTTP side of auth: Phase 12's real Identity + JWT behind the same URLs as the Phase 8 demo.
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -26,6 +26,13 @@ export class AuthService {
   login(email: string, password: string): Observable<SessionData> {
     return this.http
       .post<ApiResponse<SessionData>>(`${this.url}/auth/login`, { email, password })
+      .pipe(unwrap(), tap((s) => this.session.start(s)));
+  }
+
+  // Phase 12: create an account (always a Customer) and sign in with the session the API returns
+  register(name: string, email: string, password: string): Observable<SessionData> {
+    return this.http
+      .post<ApiResponse<SessionData>>(`${this.url}/auth/register`, { name, email, password })
       .pipe(unwrap(), tap((s) => this.session.start(s)));
   }
 

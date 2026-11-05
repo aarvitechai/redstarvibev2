@@ -12,7 +12,7 @@ const API = 'http://localhost:5240/api/destinations';
 const CUSTOMER_SESSION: SessionData = {
   accessToken: 'demo.2.9999999999',
   expiresAt: new Date(Date.now() + 1_800_000).toISOString(),
-  user: { id: 2, name: 'Asha Verma', email: 'asha@redstar.dev', roles: ['Customer'] },
+  user: { id: 'c0000000-0000-0000-0000-000000000002', name: 'Asha Verma', email: 'asha@redstar.dev', roles: ['Customer'] },
 };
 
 let fixture: ComponentFixture<App>;

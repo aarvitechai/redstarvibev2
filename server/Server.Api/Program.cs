@@ -1,19 +1,26 @@
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 using Server.Api.Data;
 using Server.Api.Auth;
 using Server.Api.Middleware;
+using Server.Api.Controllers;
 using Server.Api.Models;
+using Server.Api.Models.Entities;
 using Server.Api.Services;
 
-// Later phases add: DbContext (11), Identity + JWT replacing demo auth (12), order services (13).
+// Later phases add: order services (13).
 var builder = WebApplication.CreateBuilder(args);
 
 const string ClientCorsPolicy = "ClientCors";
 
-// Allowed client origins come from configuration (appsettings / env vars), never hard-coded for prod.
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
 builder.Services.AddControllers()
     // [ApiController] returns 400 automatically when a DTO fails validation.
@@ -46,25 +53,98 @@ builder.Services.AddSingleton<IProductImageStore, FileSystemProductImageStore>()
 builder.Services.AddSingleton<IDestinationService, InMemoryDestinationService>(); // Phase 10
 builder.Services.AddSingleton(TimeProvider.System); // "now" as a dependency, so tests can control time
 
-// Phase 8: DEMO authentication (unsigned tokens). Development only. Phase 12 replaces it with Identity + JWT.
-// Fail fast: never let a forgeable token scheme reach a real environment by accident.
-var demoAuthEnabled = builder.Configuration.GetValue<bool>("Auth:DemoTokensEnabled");
-if (demoAuthEnabled && !builder.Environment.IsDevelopment())
-    throw new InvalidOperationException("Auth:DemoTokensEnabled must only be true in Development.");
-builder.Services.AddSingleton(new DemoAuthSettings(demoAuthEnabled));
-// The scheme is ALWAYS registered: with the flag off it authenticates nobody, so [Authorize] answers 401
-// instead of crashing with "no authentication scheme" (a 500).
-builder.Services.AddAuthentication(DemoAuthHandler.SchemeName)
-    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DemoAuthHandler>(DemoAuthHandler.SchemeName, null);
+// Phase 12: REAL authentication: ASP.NET Core Identity (users, password hashing, lockout) plus signed JWT bearer tokens.
+builder.Services.AddIdentityCore<ApplicationUser>(o =>
+    {
+        o.User.RequireUniqueEmail = true;
+        o.Password.RequiredLength = 8;
+        o.Lockout.MaxFailedAccessAttempts = 5;                       // 5 wrong passwords...
+        o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);  // ...lock the account for 5 minutes
+        o.Lockout.AllowedForNewUsers = true;
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager(); // CheckPasswordSignInAsync = password check + lockout counting
+
+// JWT settings, validated AT STARTUP: a missing or short signing key stops the app with a clear message,
+// instead of failing on the first login (or worse, running with a weak key)
+builder.Services.AddOptions<JwtOptions>().BindConfiguration(JwtOptions.Section).ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddSingleton<TokenService>();
+builder.Services.AddScoped<AuthService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+// Configured through options (not inline) so the validation parameters use the FINAL configuration, the same lesson
+// as the connection string in Phase 11: the test host's settings must win.
+builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<IOptions<JwtOptions>>((bearer, jwtOptions) =>
+    {
+        var jwt = jwtOptions.Value;
+        bearer.MapInboundClaims = false; // keep the JWT claim names ("sub", "role") instead of long legacy URIs
+        bearer.TokenValidationParameters = new TokenValidationParameters
+        {
+            // The common JWT mistakes, all closed here: validate WHO issued it, WHO it's for, WHEN it expires, and the SIGNATURE
+            ValidateIssuer = true,
+            ValidIssuer = jwt.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwt.Audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30), // the default is 5 MINUTES of grace; keep expiry meaningful
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = jwt.Key(),
+            ValidAlgorithms = [SecurityAlgorithms.HmacSha256], // refuse "alg: none" and algorithm-switching tricks
+            NameClaimType = "name",
+            RoleClaimType = "role",
+        };
+        bearer.Events = new JwtBearerEvents
+        {
+            // 401/403 in our envelope (by default they have an empty body)
+            OnChallenge = async ctx =>
+            {
+                ctx.HandleResponse();
+                ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                ctx.Response.Headers.WWWAuthenticate = "Bearer";
+                await ctx.Response.WriteAsJsonAsync(ApiResponse<object>.Fail("Please log in to continue."));
+            },
+            OnForbidden = async ctx =>
+            {
+                ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await ctx.Response.WriteAsJsonAsync(ApiResponse<object>.Fail("You don't have permission to do that."));
+            },
+        };
+    });
 builder.Services.AddAuthorization();
+
+// RATE LIMITING on the auth endpoints: at most N attempts per minute per client address, then 429 + Retry-After.
+// Together with account lockout, this makes password guessing slow. (Behind a proxy, configure ForwardedHeaders so
+// the real client IP is used: Phase 15.)
+// The limit is read LAZILY from the final configuration (Configure<IConfiguration>), the same lesson as the connection
+// string: an eager builder.Configuration read here would ignore the test host's settings (it did, at first).
+builder.Services.AddRateLimiter(_ => { });
+builder.Services.AddOptions<RateLimiterOptions>().Configure<IConfiguration>((o, config) =>
+{
+    var authPermitLimit = config.GetValue("RateLimiting:AuthPermitLimit", 10);
+    o.AddPolicy(RateLimits.Auth, http => RateLimitPartition.GetFixedWindowLimiter(
+        http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = authPermitLimit, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    o.OnRejected = async (ctx, ct) =>
+    {
+        ctx.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        ctx.HttpContext.Response.Headers.RetryAfter = "60";
+        await ctx.HttpContext.Response.WriteAsJsonAsync(ApiResponse<object>.Fail("Too many attempts. Please wait a minute and try again."), ct);
+    };
+});
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();   // used for non-API errors (e.g. 404 for an unknown route)
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // Phase 6: unhandled exceptions -> 500 envelope with a reference id
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>("database"); // /health now also checks that SQL Server answers
 
-builder.Services.AddCors(options =>
+// Allowed client origins come from configuration (appsettings / env vars), never hard-coded for prod.
+// Read lazily from the FINAL configuration, like every other setting (see the Phase 11 lesson).
+builder.Services.AddCors();
+builder.Services.AddOptions<CorsOptions>().Configure<IConfiguration>((options, config) =>
 {
+    var allowedOrigins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
     options.AddPolicy(ClientCorsPolicy, policy =>
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
@@ -111,6 +191,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseCors(ClientCorsPolicy);
+app.UseRateLimiter(); // after CORS, so a 429 still carries the CORS headers the browser needs to read it
 // AuthN ("who are you?") must run before AuthZ ("are you allowed?"), and both after CORS,
 // so a 401/403 still carries the CORS headers the browser needs in order to read it.
 app.UseAuthentication();
@@ -118,6 +199,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+
+// DEVELOPMENT demo accounts (admin@redstar.dev / asha@redstar.dev). Never outside Development: well-known passwords.
+if (app.Configuration.GetValue<bool>("Auth:SeedDemoUsers"))
+{
+    if (!app.Environment.IsDevelopment())
+        throw new InvalidOperationException("Auth:SeedDemoUsers must only be true in Development.");
+    await IdentitySeeder.SeedDemoUsersAsync(app.Services);
+}
 
 app.Run();
 

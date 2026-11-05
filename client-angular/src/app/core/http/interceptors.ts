@@ -1,6 +1,6 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { catchError, finalize, throwError, timeout } from 'rxjs';
+import { catchError, finalize, switchMap, throwError, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Session } from '../auth/session';
 import { CORRELATION_HEADER, toApiError } from './api';
@@ -40,15 +40,30 @@ export const activityInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(finalize(() => activity.end())); // finalize runs on success, error AND cancel
 };
 
-// 4. Timeout + error mapping + global 401, in ONE place for every request
+// 4. Timeout + error mapping + refresh-on-401 + global 401, in ONE place for every request
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const session = inject(Session);
+  const sentToken = req.headers.has('Authorization'); // a wrong password at login is also a 401: not "expired"
   return next(req).pipe(
     timeout(environment.apiTimeoutMs),
     catchError((err: unknown) => {
       const apiError = toApiError(err);
-      // Only when we SENT a token: a wrong password at login is also a 401, and must not log anyone out
-      if (apiError.status === 401 && req.headers.has('Authorization')) session.notifyUnauthorized(apiError);
+      if (apiError.status !== 401 || !sentToken) return throwError(() => apiError);
+
+      // Phase 12: the 15-minute access token probably expired. Refresh ONCE (shared with any other request doing
+      // the same), then RETRY this request with the new token. If that fails too, the session is really over.
+      if (session.canRefresh()) {
+        return session.refresh().pipe(
+          switchMap((fresh) => next(req.clone({ setHeaders: { Authorization: `Bearer ${fresh.accessToken}` } }))),
+          timeout(environment.apiTimeoutMs),
+          catchError((retryErr: unknown) => {
+            const retryError = toApiError(retryErr);
+            if (retryError.status === 401) session.notifyUnauthorized(retryError);
+            return throwError(() => retryError);
+          }),
+        );
+      }
+      session.notifyUnauthorized(apiError);
       return throwError(() => apiError);
     }),
   );

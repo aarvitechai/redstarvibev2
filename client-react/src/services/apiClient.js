@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { API_TIMEOUT_MS, API_URL } from '../constants/config';
 import { networkActivity } from './networkActivity';
-import { getAccessToken, notifyUnauthorized } from './session';
+import { getAccessToken, getSession, notifyUnauthorized } from './session';
+import { refreshSession } from './tokenRefresh';
 
 export const CORRELATION_HEADER = 'X-Correlation-Id';
 
@@ -50,7 +51,7 @@ apiClient.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
     networkActivity.end();
     if (isAbortError(error)) throw error; // pass cancellations through untouched
 
@@ -64,7 +65,20 @@ apiClient.interceptors.response.use(
     const apiError = toApiError(error.response);
     // ONE place handles "session expired". Only when we SENT a token: a wrong password at login is also a 401,
     // and it must not trigger a logout/redirect.
-    if (apiError.status === 401 && error.config?.headers?.has?.('Authorization')) notifyUnauthorized(apiError);
+    if (apiError.status === 401 && error.config?.headers?.has?.('Authorization')) {
+      // Phase 12: the ACCESS token probably expired (it only lives 15 minutes). Refresh it ONCE, then retry the
+      // original request with the new token. The user never notices. _retried prevents an endless loop.
+      if (!error.config._retried && getSession()?.refreshToken) {
+        try {
+          await refreshSession();
+          error.config._retried = true;
+          return apiClient.request(error.config); // the request interceptor adds the NEW token
+        } catch {
+          // the refresh token is no good either: the session is really over
+        }
+      }
+      notifyUnauthorized(apiError);
+    }
     throw apiError;
   },
 );

@@ -26,6 +26,7 @@ export const routes: Routes = [
   { path: 'cart', loadComponent: () => import('./features/cart/cart-page').then((m) => m.CartPage), title: t('Cart') },
   // Phase 8: auth. Guards are UX ONLY: the API refuses unauthorised calls with 401/403 regardless.
   { path: 'login', canActivate: [guestOnlyGuard], loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage), title: t('Log in') },
+  { path: 'register', canActivate: [guestOnlyGuard], loadComponent: () => import('./features/auth/register-page').then((m) => m.RegisterPage), title: t('Create account') },
   { path: 'unauthorized', loadComponent: () => import('./features/auth/unauthorized-page').then((m) => m.UnauthorizedPage), title: t('Not allowed') },
   {
     path: 'account',

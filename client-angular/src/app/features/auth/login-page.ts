@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService, safeRedirect } from '../../core/auth/auth';
 import { Session } from '../../core/auth/session';
 import { ApiError } from '../../core/http/api';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="login" aria-labelledby="login-title">
@@ -30,6 +30,8 @@ import { ApiError } from '../../core/http/api';
         @if (error()) { <p role="alert" class="form-error">{{ error() }}</p> }
         <button type="submit" class="primary" [disabled]="pending()">{{ pending() ? 'Logging in…' : 'Log in' }}</button>
       </form>
+
+      <p class="muted">New here? <a routerLink="/register" [queryParams]="{ returnUrl: returnUrl() ?? null }">Create an account</a></p>
 
       <details class="demo">
         <summary>Demo accounts (development only)</summary>

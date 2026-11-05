@@ -26,6 +26,11 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public string ImagesPath { get; } = Path.Combine(Path.GetTempPath(), "redstar-tests", Guid.NewGuid().ToString("N"));
 
+    public const string TestSigningKey = "test-signing-key-for-integration-tests-only-0123456789";
+
+    // Tests log in a lot. The dedicated rate-limit tests use a factory with a small limit (see AuthTests).
+    protected virtual int RateLimit => 10_000;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Added LAST, so these override appsettings.Development.json (which points at the real dev database)
@@ -33,6 +38,9 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         {
             ["ConnectionStrings:DefaultConnection"] = ConnectionString,
             ["Uploads:ProductImagesPath"] = ImagesPath,
+            ["Jwt:SigningKey"] = TestSigningKey,            // a test-only key (the real one lives in User Secrets)
+            ["Auth:SeedDemoUsers"] = "false",               // seeded in InitializeAsync, AFTER the database exists
+            ["RateLimiting:AuthPermitLimit"] = RateLimit.ToString(),
         }));
     }
 
@@ -54,6 +62,7 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         using var scope = Services.CreateScope();
         await GuardedDb(scope).Database.MigrateAsync(); // the real migrations
+        await global::Server.Api.Auth.IdentitySeeder.SeedDemoUsersAsync(Services); // admin@redstar.dev, asha@redstar.dev
     }
 
     async Task IAsyncLifetime.DisposeAsync()

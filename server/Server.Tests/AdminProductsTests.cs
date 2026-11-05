@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using Server.Api.Auth;
 using Server.Api.Controllers;
 using Server.Api.Models;
 using Server.Api.Models.Dto;
@@ -17,7 +18,7 @@ public class AdminProductsTests(ApiFactory factory) : IClassFixture<ApiFactory>
     {
         var anon = factory.CreateClient();
         var login = await anon.PostAsJsonAsync("/api/auth/login", new LoginDto(email, password));
-        var token = (await login.Content.ReadFromJsonAsync<ApiResponse<LoginResultDto>>())!.Data!.AccessToken;
+        var token = (await login.Content.ReadFromJsonAsync<ApiResponse<AuthResultDto>>())!.Data!.AccessToken;
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;

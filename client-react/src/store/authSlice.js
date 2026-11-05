@@ -18,6 +18,18 @@ export const loginUser = createAsyncThunk('auth/login', async ({ email, password
   }
 });
 
+// Phase 12: register = create the account AND sign in (the API returns the same session as login)
+export const registerUser = createAsyncThunk('auth/register', async ({ name, email, password }, { rejectWithValue }) => {
+  try {
+    const session = await authApi.register(name, email, password);
+    saveSession(session);
+    return session;
+  } catch (error) {
+    // Keep the field errors (e.g. "email already exists") so the form can show them under the right input
+    return rejectWithValue({ message: error.message, fieldErrors: error.fieldErrors ?? null });
+  }
+});
+
 // The logout THUNK lives in store/sessionActions.js (it also clears the RTK Query cache).
 
 const authSlice = createSlice({
@@ -25,6 +37,10 @@ const authSlice = createSlice({
   // initialState as a FUNCTION: read when the store is created, after restoreSession() ran in main.jsx
   initialState: () => ({ session: getSession(), status: 'idle', error: null, logoutReason: null }),
   reducers: {
+    // A token refresh (in an HTTP client or the expiry timer) produced a new session: mirror it into Redux
+    sessionUpdated: (state, action) => {
+      state.session = action.payload;
+    },
     loggedOut: (state, action) => {
       state.session = null;
       state.status = 'idle';
@@ -47,11 +63,15 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'idle';
         state.error = action.payload ?? 'Login failed.';
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.session = action.payload;
+        state.logoutReason = null;
       });
   },
 });
 
-export const { loggedOut } = authSlice.actions;
+export const { loggedOut, sessionUpdated } = authSlice.actions;
 export default authSlice.reducer;
 
 export const selectUser = (state) => state.auth.session?.user ?? null;

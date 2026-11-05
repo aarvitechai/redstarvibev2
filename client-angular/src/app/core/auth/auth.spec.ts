@@ -9,8 +9,8 @@ import { safeRedirect } from './auth';
 import { AuthUser, Session, SessionData } from './session';
 
 const API = 'http://localhost:5240/api';
-const ADMIN: AuthUser = { id: 1, name: 'Admin User', email: 'admin@redstar.dev', roles: ['Admin'] };
-const CUSTOMER: AuthUser = { id: 2, name: 'Asha Verma', email: 'asha@redstar.dev', roles: ['Customer'] };
+const ADMIN: AuthUser = { id: 'a0000000-0000-0000-0000-000000000001', name: 'Admin User', email: 'admin@redstar.dev', roles: ['Admin'] };
+const CUSTOMER: AuthUser = { id: 'c0000000-0000-0000-0000-000000000002', name: 'Asha Verma', email: 'asha@redstar.dev', roles: ['Customer'] };
 const ok = <T>(data: T) => ({ success: true, data, errors: [] });
 const fail = (status: number, message: string) => ({ body: { success: false, data: null, errors: [message] }, opts: { status, statusText: 'x' } });
 
@@ -51,10 +51,10 @@ function respond(req: TestRequest) {
       const f = fail(401, 'Please log in to continue.');
       return req.flush(f.body, f.opts);
     }
-    return req.flush(ok(token.startsWith('demo.1.') ? ADMIN : CUSTOMER));
+    return req.flush(ok(token.includes(ADMIN.id) ? ADMIN : CUSTOMER));
   }
   if (url === `${API}/admin/summary`) {
-    if (!token?.startsWith('demo.1.')) {
+    if (!token?.includes(ADMIN.id)) {
       const f = fail(403, "You don't have permission to do that.");
       return req.flush(f.body, f.opts);
     }

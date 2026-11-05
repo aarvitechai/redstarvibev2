@@ -22,7 +22,7 @@
 
 **Demo accounts (Development only):** `admin@redstar.dev` / `Admin@123`, `asha@redstar.dev` / `Customer@123`.
 
-## Demo auth (DEVELOPMENT ONLY)
+## Demo auth (DEVELOPMENT ONLY; replaced by Identity + JWT in Phase 12)
 - The token is `demo.<userId>.<expiresUnix>`. It's **unsigned**, so anyone can forge one. A test and a live `curl` call both showed a hand-written admin token being accepted. This is the reason for **Phase 12**: a JWT carries a **signature** the server checks, so changing the payload breaks it.
 - `Auth:DemoTokensEnabled` is `true` only in `appsettings.Development.json`, and the API **refuses to start** if it's enabled anywhere else.
 - The auth scheme is always registered. With the flag off it authenticates nobody, so `[Authorize]` returns 401 instead of crashing.

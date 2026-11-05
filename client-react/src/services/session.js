@@ -1,22 +1,24 @@
-// The session: { accessToken, expiresAt, user }. Used by the Axios interceptor (token) and AuthProvider (user).
+// The session: { accessToken, expiresAt, refreshToken, user }.
+// Used by the HTTP clients (token, refresh) and mirrored into Redux (state.auth) by <SessionWatcher />.
 //
-// WHERE TO KEEP THE TOKEN: a trade-off, not a free choice.
+// WHERE TO KEEP THE TOKENS: a trade-off, not a free choice.
 //  - localStorage (used here): survives a reload and is shared by tabs. But ANY script running on the page can
-//    read it, so one XSS bug leaks the token. Mitigate: no dangerouslySetInnerHTML, short token lifetimes, and a CSP.
+//    read it, so one XSS bug leaks the tokens. Mitigate: no dangerouslySetInnerHTML, a CSP, a SHORT access token
+//    (15 min), and refresh-token ROTATION with reuse detection on the server (Phase 12).
 //  - memory only: safest against theft, but a reload logs you out.
-//  - httpOnly cookie: JavaScript can't read it at all, which is safest against XSS. But the browser sends it
-//    automatically, so you need CSRF protection (SameSite cookies or an anti-forgery token).
-// Phase 12 adds short-lived access tokens + refresh tokens to shrink the damage if a token leaks.
+//  - httpOnly cookie for the refresh token: JavaScript can't read it at all, which is safest against XSS. But the
+//    browser sends it automatically, so you need CSRF protection (SameSite cookies or an anti-forgery token).
 const STORAGE_KEY = 'redstar.session';
 
 let session = null;
 let accessToken = null;
 const unauthorizedListeners = new Set();
+const changeListeners = new Set();
 
 export const getSession = () => session;
 export const getAccessToken = () => accessToken;
 
-// Low-level: set only the token (used by tests and by saveSession)
+// Low-level: set only the token (used by tests)
 export const setAccessToken = (token) => {
   accessToken = token || null;
 };
@@ -32,20 +34,28 @@ export function saveSession(next) {
   } catch {
     // Storage can be blocked (private mode, browser settings). The session still works until the next reload.
   }
+  changeListeners.forEach((listener) => listener(session));
 }
 
 // Called ONCE in main.jsx, BEFORE the first render, so the very first API request already has the token.
-// A stored session that has already expired is thrown away (the user has to log in again).
-export function restoreSession(now = Date.now()) {
+// An expired ACCESS token is fine if there's a refresh token: the first request will refresh it.
+export function restoreSession() {
   let stored = null;
   try {
     stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
   } catch {
     stored = null; // corrupted JSON: treat it as logged out
   }
-  const valid = stored?.accessToken && stored?.user && !isExpired(stored, now) ? stored : null;
-  saveSession(valid); // also clears an expired or corrupted entry
+  const usable = stored?.user && (stored.refreshToken || (stored.accessToken && !isExpired(stored)));
+  const valid = usable ? stored : null;
+  saveSession(valid); // also clears an unusable or corrupted entry
   return valid;
+}
+
+// Something changed the session outside Redux (a token refresh inside an HTTP client): SessionWatcher listens
+export function onSessionChange(listener) {
+  changeListeners.add(listener);
+  return () => changeListeners.delete(listener);
 }
 
 // Returns an unsubscribe function (the same pattern as useEffect cleanup)

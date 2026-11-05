@@ -22,6 +22,7 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 9: Redux Toolkit (Project 4: counter and cart)](docs/phase-09-redux-toolkit.md)
 - [Phase 10: RTK Query (Project 5: Destination Manager)](docs/phase-10-rtk-query.md)
 - [Phase 11: EF Core + SQL Server (Project 6: Product API)](docs/phase-11-efcore.md)
+- [Phase 12: Identity, JWT, Roles and CORS (Project 7: Auth API)](docs/phase-12-identity-jwt.md)
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).
@@ -55,8 +56,8 @@ cd client-angular && npm test -- --watch=false
 ## Config and secrets
 - Dev connection string: `server/Server.Api/appsettings.Development.json`. It uses Windows auth, so it holds no password.
 - CORS origins: `Cors:AllowedOrigins` in appsettings, or override with env vars such as `Cors__AllowedOrigins__0`.
-- Demo auth (Phase 8, Development only): `Auth:DemoTokensEnabled` in `appsettings.Development.json`. Accounts: `admin@redstar.dev` / `Admin@123`, `asha@redstar.dev` / `Customer@123`.
-- JWT key (Phase 12): kept in `dotnet user-secrets`, never in Git.
+- Auth (Phase 12): ASP.NET Core Identity + JWT. Development demo accounts (seeded when `Auth:SeedDemoUsers` is true): `admin@redstar.dev` / `Admin@123`, `asha@redstar.dev` / `Customer@123`.
+- JWT signing key: `cd server/Server.Api && dotnet user-secrets set "Jwt:SigningKey" "<64 random bytes, base64>"`. Never in Git; production uses the `Jwt__SigningKey` environment variable or Key Vault.
 
 ## Committing a phase
 ```bash

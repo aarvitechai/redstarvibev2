@@ -2,6 +2,7 @@ import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useGetDestinationsQuery } from '../store/api/destinationsApi';
+import { getAccessToken as getSessionToken } from '../services/session';
 import { CUSTOMER, loginAs } from './authHelpers';
 import { callDetails, fail, mockFetch, ok } from './fetchMock';
 import { renderApp, renderWithProviders } from './renderWithProviders';
@@ -133,7 +134,7 @@ describe('mutations + tags: the list stays in sync without "reload" code', () =>
     await waitFor(() => expect(screen.getByText('Showing 1–6 of 15')).toBeInTheDocument());
     expect(names()[0]).toBe('Agra'); // fresh data from the server, sorted by the server
     const posts = (await Promise.all(fetchMock.mock.calls.map((_, i) => callDetails(fetchMock, i)))).filter((c) => c.method === 'POST');
-    expect(posts[0].headers.get('Authorization')).toMatch(/^Bearer demo\.2\./); // prepareHeaders read the token from Redux
+    expect(posts[0].headers.get('Authorization')).toBe(`Bearer ${getSessionToken()}`); // prepareHeaders read the token from Redux
   });
 
   it('deleting invalidates the item and LIST', async () => {

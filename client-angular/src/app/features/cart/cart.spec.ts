@@ -86,7 +86,7 @@ describe('CartStore (signal + reducer)', () => {
 
   it('RESETS ON LOGOUT', () => {
     const session = TestBed.inject(Session);
-    session.start({ accessToken: 'demo.2.9999999999', expiresAt: new Date(Date.now() + 60_000).toISOString(), user: { id: 2, name: 'A', email: 'a@x.com', roles: ['Customer'] } });
+    session.start({ accessToken: 'demo.2.9999999999', expiresAt: new Date(Date.now() + 60_000).toISOString(), user: { id: 'c2', name: 'A', email: 'a@x.com', roles: ['Customer'] } });
     const cart = TestBed.inject(CartStore);
     cart.dispatch({ type: 'added', product: burger });
 

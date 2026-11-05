@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getSession, restoreSession, saveSession } from '../services/session';
 import { safeRedirect } from '../utility/redirect';
+import { getAccessToken as getSessionToken } from '../services/session';
 import { ADMIN, CUSTOMER, loginAs } from './authHelpers';
 import { callDetails, fail, mockFetch, ok } from './fetchMock';
 import { renderApp } from './renderWithProviders';
@@ -19,15 +20,15 @@ function fakeAuthApi({ meStatus = 200 } = {}) {
       const { email, password } = JSON.parse(body);
       const user = [ADMIN, CUSTOMER].find((u) => u.email === email);
       if (!user || password !== (user === ADMIN ? 'Admin@123' : 'Customer@123')) return fail(401, 'Invalid email or password.');
-      return ok({ accessToken: `demo.${user.id}.9999999999`, expiresAt: new Date(Date.now() + 1_800_000).toISOString(), user });
+      return ok({ accessToken: `access-${user.id}`, expiresAt: new Date(Date.now() + 1_800_000).toISOString(), user });
     }
     if (path === '/api/auth/me') {
       if (!token || meStatus === 401) return fail(401, 'Please log in to continue.');
-      return ok(token.startsWith('demo.1.') ? ADMIN : CUSTOMER);
+      return ok(token.includes(ADMIN.id) ? ADMIN : CUSTOMER);
     }
     if (path === '/api/admin/summary') {
       if (!token) return fail(401, 'Please log in to continue.');
-      if (!token.startsWith('demo.1.')) return fail(403, "You don't have permission to do that.");
+      if (!token.includes(ADMIN.id)) return fail(403, "You don't have permission to do that.");
       return ok({ students: 4, contacts: 3, products: 11, categories: 4 });
     }
     return ok([]);
@@ -127,7 +128,7 @@ describe('role-based UI (convenience, not security)', () => {
 
     expect(await screen.findByRole('status')).toHaveTextContent("403: You don't have permission to do that.");
     const calls = await Promise.all(fetchMock.mock.calls.map((_, i) => callDetails(fetchMock, i)));
-    expect(calls.find((c) => c.url.endsWith('/api/admin/summary')).headers.get('Authorization')).toMatch(/^Bearer demo\.2\./);
+    expect(calls.find((c) => c.url.endsWith('/api/admin/summary')).headers.get('Authorization')).toBe(`Bearer ${getSessionToken()}`);
     expect(location()).toBe('/account'); // a 403 is not "logged out"
   });
 
