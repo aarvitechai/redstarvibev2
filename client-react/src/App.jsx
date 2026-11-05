@@ -1,9 +1,9 @@
+import { lazy } from 'react';
 import { Route, Routes } from 'react-router';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import { ROLES } from './constants/roles';
 import AccountPage from './pages/auth/AccountPage';
-import AdminPage from './pages/auth/AdminPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import UnauthorizedPage from './pages/auth/UnauthorizedPage';
@@ -29,8 +29,15 @@ import StudentsPage from './pages/StudentsPage';
 //     ...
 //     /login, /unauthorized       public
 //     /account          ProtectedRoute (any logged-in user)
-//     /admin            ProtectedRoute roles=[Admin]
+//     /admin            ProtectedRoute roles=[Admin] -> AdminLayout (lazy): index, products, orders
 //     *                 NotFoundPage (catch-all: must be the last resort)
+// CODE SPLITTING (plan 14.8 / Section 7): the admin area is a separate JavaScript chunk, downloaded only when an
+// admin opens it. Customers never download admin code. <Suspense> in the layouts shows a fallback meanwhile.
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const AdminPage = lazy(() => import('./pages/auth/AdminPage'));
+const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'));
+const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage'));
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -58,7 +65,11 @@ export function AppRoutes() {
           <Route path="orders" element={<MyOrdersPage />} />
         </Route>
         <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
-          <Route path="admin" element={<AdminPage />} />
+          <Route path="admin" element={<AdminLayout />}>
+            <Route index element={<AdminPage />} />
+            <Route path="products" element={<AdminProductsPage />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

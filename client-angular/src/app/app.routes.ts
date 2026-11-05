@@ -43,11 +43,16 @@ export const routes: Routes = [
     title: t('My orders'),
   },
   {
+    // Phase 14 (Project 9): the admin area, a nested layout with lazy children. Customers never download any of it.
     path: 'admin',
     canActivate: [roleGuard(ROLES.admin)],
     runGuardsAndResolvers: 'always',
-    loadComponent: () => import('./features/auth/admin-page').then((m) => m.AdminPage),
-    title: t('Admin'),
+    loadComponent: () => import('./features/admin/admin-layout').then((m) => m.AdminLayout),
+    children: [
+      { path: '', loadComponent: () => import('./features/auth/admin-page').then((m) => m.AdminPage), title: t('Admin') },
+      { path: 'products', loadComponent: () => import('./features/admin/admin-products-page').then((m) => m.AdminProductsPage), title: t('Products · Admin') },
+      { path: 'orders', loadComponent: () => import('./features/admin/admin-orders-page').then((m) => m.AdminOrdersPage), title: t('Orders · Admin') },
+    ],
   },
   // The catch-all. Order matters: the router takes the FIRST match, so '**' must be last.
   { path: '**', loadComponent: () => import('./features/home/not-found').then((m) => m.NotFound), title: t('Page not found') },

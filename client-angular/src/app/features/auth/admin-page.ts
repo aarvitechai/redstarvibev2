@@ -1,16 +1,17 @@
-import { KeyValuePipe, TitleCasePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { catchError, map, of, startWith } from 'rxjs';
 import { AdminSummary, AuthService } from '../../core/auth/auth';
 import { ApiError } from '../../core/http/api';
 
 type State = { loading: true } | { loading: false; data: AdminSummary } | { loading: false; error: string };
 
-// /admin: roleGuard('Admin') hides it from customers (UX); the API's [Authorize(Roles = "Admin")] protects the data
+// /admin: the overview. roleGuard('Admin') hides it from customers (UX); the API's [Authorize(Roles = "Admin")]
+// is what really protects the data.
 @Component({
   selector: 'app-admin-page',
-  imports: [KeyValuePipe, TitleCasePipe],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section aria-labelledby="admin-title">
@@ -20,9 +21,10 @@ type State = { loading: true } | { loading: false; data: AdminSummary } | { load
       @if ('error' in s) { <p role="alert" class="error">{{ s.error }}</p> }
       @if ('data' in s) {
         <ul class="cards" aria-label="Summary">
-          @for (item of s.data | keyvalue; track item.key) {
-            <li class="card"><span class="muted">{{ item.key | titlecase }}</span><strong class="big">{{ item.value }}</strong></li>
-          }
+          <li><a class="card" routerLink="/admin/products"><span class="muted">Products</span><strong class="big">{{ s.data.products }}</strong></a></li>
+          <li><a class="card" routerLink="/admin/orders"><span class="muted">Orders</span><strong class="big">Manage</strong></a></li>
+          <li class="card"><span class="muted">Categories</span><strong class="big">{{ s.data.categories }}</strong></li>
+          <li class="card"><span class="muted">Contacts</span><strong class="big">{{ s.data.contacts }}</strong></li>
         </ul>
       }
     </section>

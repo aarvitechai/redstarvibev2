@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Toasts } from '../ui/toast';
 import { ActivityBar } from './activity-bar';
 import { Footer } from './footer';
 import { Header } from './header';
@@ -8,13 +9,14 @@ import { Header } from './header';
 // Navigating swaps only the outlet; the header, footer and theme stay put.
 @Component({
   selector: 'app-layout',
-  imports: [ActivityBar, Header, Footer, RouterOutlet],
+  imports: [ActivityBar, Header, Footer, RouterOutlet, Toasts],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
       <app-activity-bar />
       <app-header [appName]="appName()" />
       <main class="main"><router-outlet /></main>
+      <app-toasts />
       <app-footer [appName]="appName()" />
     </div>
   `,

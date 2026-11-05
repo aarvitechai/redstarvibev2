@@ -1,0 +1,46 @@
+// The same look as client-react/src/components/admin/Admin.module.css
+.muted { color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+
+.admin-layout { display: grid; gap: 24px; grid-template-columns: 180px minmax(0, 1fr); align-items: start; }
+.admin-nav { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 16px; }
+.admin-nav a { padding: 6px 10px; border-radius: 8px; color: var(--text); text-decoration: none; }
+.admin-nav a:hover { background: var(--neutral-bg); }
+.admin-nav a.active { background: var(--primary); color: var(--primary-contrast); font-weight: 600; }
+.admin-content { min-width: 0; }
+@media (max-width: 720px) {
+  .admin-layout { grid-template-columns: minmax(0, 1fr); }
+  .admin-nav { flex-direction: row; flex-wrap: wrap; position: static; gap: 8px; }
+}
+
+.title-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.search { display: flex; flex-direction: column; gap: 4px; font-size: 0.8125rem; color: var(--muted); max-width: 320px; margin: 12px 0; }
+.search input, .search select, .row-actions select, .field input, .field select {
+  font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; min-width: 0;
+}
+.table-wrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.table caption { text-align: left; padding: 8px 0; caption-side: top; }
+.table th, .table td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table thead th { font-size: 0.8125rem; color: var(--muted); }
+.row-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.thumb { width: 48px; height: 27px; object-fit: cover; border-radius: 4px; display: block; }
+.preview { width: 160px; height: 90px; object-fit: cover; border-radius: 8px; }
+.active, .inactive, .badge { font-size: 0.75rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+.active { background: var(--success-bg); color: var(--success); }
+.inactive, .badge { background: var(--neutral-bg); color: var(--muted); }
+
+.form { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 0.8125rem; color: var(--muted); }
+.field input[aria-invalid='true'], .field select[aria-invalid='true'] { border-color: var(--primary); }
+.field-error, .form-error { color: var(--primary); font-size: 0.8125rem; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 0.875rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn, .danger, .primary {
+  font: inherit; font-size: 0.8125rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+}
+.danger { color: var(--primary); border-color: var(--primary); }
+.primary { background: var(--primary); color: var(--primary-contrast); border-color: var(--primary); }
+.btn:disabled, .danger:disabled, .primary:disabled { opacity: 0.5; cursor: not-allowed; }

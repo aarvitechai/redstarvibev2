@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
+import { ToastContainer } from 'react-toastify';
 import { Outlet, useLocation } from 'react-router';
 import ActivityBar from './ActivityBar';
+import ErrorBoundary from './ErrorBoundary';
 import Header from './Header';
 import Footer from './Footer';
 import styles from './Layout.module.css';
@@ -21,8 +23,15 @@ export default function Layout({ appName = 'RedStarVibe' }) {
       <ActivityBar />
       <Header appName={appName} />
       <main className={styles.main}>
-        <Outlet />
+        {/* key: a new page gets a fresh boundary (an error on one page doesn't stick to the next) */}
+        <ErrorBoundary key={pathname}>
+          <Suspense fallback={<p role="status">Loading…</p>}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
       </main>
+      {/* Toasts: short, non-blocking messages ("Saved", "Someone else changed this order") */}
+      <ToastContainer position="bottom-right" autoClose={4000} newestOnTop theme="colored" />
       <Footer appName={appName} />
     </div>
   );

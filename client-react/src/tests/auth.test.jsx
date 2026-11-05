@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getSession, restoreSession, saveSession } from '../services/session';
 import { safeRedirect } from '../utility/redirect';
 import { getAccessToken as getSessionToken } from '../services/session';
-import { ADMIN, CUSTOMER, loginAs } from './authHelpers';
+import { ADMIN, CUSTOMER, loginAs, subOf } from './authHelpers';
 import { callDetails, fail, mockFetch, ok } from './fetchMock';
 import { renderApp } from './renderWithProviders';
 
@@ -24,11 +24,11 @@ function fakeAuthApi({ meStatus = 200 } = {}) {
     }
     if (path === '/api/auth/me') {
       if (!token || meStatus === 401) return fail(401, 'Please log in to continue.');
-      return ok(token.includes(ADMIN.id) ? ADMIN : CUSTOMER);
+      return ok((subOf(token) === ADMIN.id || token.includes(ADMIN.id)) ? ADMIN : CUSTOMER);
     }
     if (path === '/api/admin/summary') {
       if (!token) return fail(401, 'Please log in to continue.');
-      if (!token.includes(ADMIN.id)) return fail(403, "You don't have permission to do that.");
+      if (!(subOf(token) === ADMIN.id || token.includes(ADMIN.id))) return fail(403, "You don't have permission to do that.");
       return ok({ students: 4, contacts: 3, products: 11, categories: 4 });
     }
     return ok([]);
@@ -151,12 +151,17 @@ describe('session lifetime', () => {
     saveSession(null);
     localStorage.setItem('redstar.session', JSON.stringify(saved)); // as if the browser was reloaded
 
-    expect(restoreSession()).toEqual(saved);
+    const restored = restoreSession();
+    expect(restored.accessToken).toBe(saved.accessToken);
+    expect(restored.user).toEqual(saved.user);
+    // Phase 14: expiresAt is re-read FROM THE TOKEN (jwt-decode), to the second
+    expect(Math.abs(Date.parse(restored.expiresAt) - Date.parse(saved.expiresAt))).toBeLessThan(1000);
     expect(getSession().user.name).toBe('Asha Verma');
   });
 
   it('an expired or corrupted saved session is discarded on load', () => {
-    localStorage.setItem('redstar.session', JSON.stringify({ ...loginAs(CUSTOMER), expiresAt: '2000-01-01T00:00:00Z' }));
+    // Phase 14: the token's OWN expiry (exp, read with jwt-decode) decides. A stored expiresAt can't make it valid.
+    localStorage.setItem('redstar.session', JSON.stringify({ ...loginAs(CUSTOMER, { minutes: -1 }), expiresAt: '2999-01-01T00:00:00Z' }));
     expect(restoreSession()).toBeNull();
     expect(localStorage.getItem('redstar.session')).toBeNull();
 

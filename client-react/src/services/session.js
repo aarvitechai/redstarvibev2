@@ -8,6 +8,8 @@
 //  - memory only: safest against theft, but a reload logs you out.
 //  - httpOnly cookie for the refresh token: JavaScript can't read it at all, which is safest against XSS. But the
 //    browser sends it automatically, so you need CSRF protection (SameSite cookies or an anti-forgery token).
+import { tokenExpiresAt } from '../utility/jwt';
+
 const STORAGE_KEY = 'redstar.session';
 
 let session = null;
@@ -46,7 +48,12 @@ export function restoreSession() {
   } catch {
     stored = null; // corrupted JSON: treat it as logged out
   }
-  const usable = stored?.user && (stored.refreshToken || (stored.accessToken && !isExpired(stored)));
+  // jwt-decode: read the expiry FROM THE TOKEN itself (exp), instead of trusting the stored expiresAt.
+  // (Decoding is not verifying: the server still checks the signature on every request.)
+  const exp = stored?.accessToken ? tokenExpiresAt(stored.accessToken) : null;
+  if (stored && exp) stored.expiresAt = new Date(exp).toISOString();
+  const accessStillValid = Boolean(exp) && exp > Date.now();
+  const usable = stored?.user && (stored.refreshToken || accessStillValid);
   const valid = usable ? stored : null;
   saveSession(valid); // also clears an unusable or corrupted entry
   return valid;

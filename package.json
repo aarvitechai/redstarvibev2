@@ -1,0 +1,21 @@
+{
+  "name": "redstarvibe",
+  "private": true,
+  "description": "RedStarVibe full-stack learning project: .NET 10 API + React + Angular",
+  "scripts": {
+    "dev": "concurrently -k -n api,react,angular -c blue,cyan,red \"npm:dev:api\" \"npm:dev:react\" \"npm:dev:angular\"",
+    "dev:api": "dotnet watch run --project server/Server.Api --launch-profile http --no-hot-reload",
+    "dev:react": "npm --prefix client-react run dev",
+    "dev:angular": "npm --prefix client-angular start",
+    "install:all": "npm install && npm --prefix client-react install && npm --prefix client-angular install",
+    "test": "npm run test:api && npm run test:react && npm run test:angular",
+    "test:api": "dotnet test server",
+    "test:react": "npm --prefix client-react exec vitest run",
+    "test:angular": "npm --prefix client-angular test -- --watch=false",
+    "build": "dotnet build server -c Release && npm --prefix client-react run build && npm --prefix client-angular run build",
+    "db:update": "dotnet ef database update --project server/Server.Api -- --environment Development"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5"
+  }
+}

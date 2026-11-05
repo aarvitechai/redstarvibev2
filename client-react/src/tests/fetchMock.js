@@ -11,7 +11,10 @@ export function mockFetch(handler) {
     const url = isRequest ? input.url : String(input);
     const method = (isRequest ? input.method : init.method) ?? 'GET';
     const headers = new Headers(isRequest ? input.headers : init.headers);
-    const body = isRequest ? (await input.clone().text()) || undefined : init.body;
+    // Don't read MULTIPART bodies (file uploads): in this test environment reading a FormData stream never finishes.
+    // Handlers that care can still check the Content-Type header.
+    const isMultipart = headers.get('Content-Type')?.startsWith('multipart/form-data');
+    const body = isMultipart ? '[multipart]' : isRequest ? (await input.clone().text()) || undefined : init.body;
     const signal = init.signal ?? (isRequest ? input.signal : undefined);
 
     const { status = 200, body: resBody, delayMs = 0, headers: resHeaders = {} } = handler(url, { method, body, headers });

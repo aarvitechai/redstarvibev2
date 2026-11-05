@@ -24,34 +24,27 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 11: EF Core + SQL Server (Project 6: Product API)](docs/phase-11-efcore.md)
 - [Phase 12: Identity, JWT, Roles and CORS (Project 7: Auth API)](docs/phase-12-identity-jwt.md)
 - [Phase 13: Orders and Ratings (Project 8)](docs/phase-13-orders-ratings.md)
+- [Phase 14: Capstone – Admin app, polish, one-command run (Projects 9 and 10)](docs/phase-14-capstone.md)
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).
 
 ## Database (once, and after pulling new migrations)
 ```bash
-cd server
-ASPNETCORE_ENVIRONMENT=Development dotnet ef database update --project Server.Api
+npm run db:update        # from the repo root (same as: dotnet ef database update --project server/Server.Api -- --environment Development)
 ```
 Tests create and delete their own `RedStarVibeDb_Test_*` databases; they never touch `RedStarVibeDb`.
 
-## Run
+## Run (one command)
 ```bash
-# API
-cd server && dotnet run --project Server.Api --launch-profile http
-
-# React
-cd client-react && npm install && npm run dev     # copy .env.example to .env first
-
-# Angular
-cd client-angular && npm install && npm start
+npm run install:all      # once: root + client-react + client-angular
+npm run dev              # API :5240 + React :5173 + Angular :4200, colour-coded output; Ctrl+C stops all three
 ```
+Copy `client-react/.env.example` to `.env` first. Single apps: `npm run dev:api`, `npm run dev:react`, `npm run dev:angular`.
 
 ## Test
 ```bash
-cd server && dotnet test
-cd client-react && npx vitest run
-cd client-angular && npm test -- --watch=false
+npm test                 # all three suites (or: npm run test:api / test:react / test:angular)
 ```
 
 ## Config and secrets
