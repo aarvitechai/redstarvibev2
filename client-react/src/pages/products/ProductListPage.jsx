@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useOutletContext, useSearchParams } from 'react-router';
 import { PRODUCT_PARAMS, PRODUCT_SORTS, productPath } from '../../constants/routes';
 import { useQuery } from '../../hooks/useQuery';
-import { productsApi } from '../../services/productsApi';
+import { imageSrc, productsApi } from '../../services/productsApi';
 import { formatPrice } from '../../utility/format';
 import AddToCartButton from '../../components/cart/AddToCartButton';
 import styles from './Products.module.css';
@@ -19,6 +19,7 @@ export default function ProductListPage() {
   const category = searchParams.get(PRODUCT_PARAMS.category) ?? '';
   const sort = searchParams.get(PRODUCT_PARAMS.sort) ?? 'name';
   const urlSearch = searchParams.get(PRODUCT_PARAMS.search) ?? '';
+  const page = Math.max(1, Number(searchParams.get(PRODUCT_PARAMS.page)) || 1);
 
   // The text box is local while typing; the URL (and so the request) updates after a 300 ms pause.
   // `typed` = { forUrl, value }: what the user typed, and which URL value it belongs to. If the URL changes from
@@ -37,7 +38,7 @@ export default function ProductListPage() {
     timer.current = setTimeout(() => {
       setTyped({ forUrl: value.trim(), value }); // keep the raw text (e.g. a trailing space) in the box
       // replace: true -> no history entry for every pause in typing
-      updateParams({ [PRODUCT_PARAMS.search]: value.trim() }, { replace: true });
+      updateParams({ [PRODUCT_PARAMS.search]: value.trim(), [PRODUCT_PARAMS.page]: '' }, { replace: true }); // a new search starts at page 1
     }, 300);
   }
 
@@ -57,14 +58,15 @@ export default function ProductListPage() {
     }, options);
   }
 
-  const filters = { category, search: urlSearch, sort };
+  const filters = { category, search: urlSearch, sort, page };
   const products = useQuery(JSON.stringify(filters), (signal) => productsApi.list(filters, { signal }));
 
   const categoryName = categories.find((c) => c.slug === category)?.name;
   const heading = category ? (categoryName ?? category) : 'All products';
   const unknownCategory = category && categories.length > 0 && !categoryName;
   const hasFilters = category || urlSearch || sort !== 'name';
-  const list = products.data ?? [];
+  const list = products.data?.items ?? [];
+  const paging = products.data;
 
   return (
     <section aria-labelledby="products-title">
@@ -79,7 +81,7 @@ export default function ProductListPage() {
         </label>
         <label>
           Sort
-          <select value={sort} onChange={(e) => updateParams({ [PRODUCT_PARAMS.sort]: e.target.value === 'name' ? '' : e.target.value })}>
+          <select value={sort} onChange={(e) => updateParams({ [PRODUCT_PARAMS.sort]: e.target.value === 'name' ? '' : e.target.value, [PRODUCT_PARAMS.page]: '' })}>
             {PRODUCT_SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
         </label>
@@ -97,13 +99,14 @@ export default function ProductListPage() {
       ) : (
         <>
           <p className={styles.muted} aria-live="polite">
-            {products.loading ? 'Loading…' : `${list.length} product${list.length === 1 ? '' : 's'}`}
+            {products.loading ? 'Loading…' : `${paging.totalCount} product${paging.totalCount === 1 ? '' : 's'}`}
           </p>
           <ul className={styles.grid} aria-label="Products" aria-busy={products.loading}>
             {list.map((p) => (
               <li key={p.id} className={styles.cardShell}>
                 {/* state: remember where we came from, so the detail page can link back to THESE results */}
                 <Link to={productPath(p.id)} state={{ from: `${location.pathname}${location.search}` }} className={styles.card}>
+                  {p.imageUrl && <img className={styles.thumb} src={imageSrc(p.imageUrl)} alt="" loading="lazy" width="320" height="180" />}
                   <span className={styles.badge}>{p.categoryName}</span>
                   <strong>{p.name}</strong>
                   <span className={styles.muted}>{p.description}</span>
@@ -115,6 +118,15 @@ export default function ProductListPage() {
             ))}
           </ul>
           {!products.loading && list.length === 0 && <p className={styles.muted}>No products match these filters.</p>}
+          {paging?.totalPages > 1 && (
+            <nav className={styles.pager} aria-label="Pagination">
+              <button type="button" className={styles.button} disabled={!paging.hasPrevious}
+                onClick={() => updateParams({ [PRODUCT_PARAMS.page]: page - 1 > 1 ? String(page - 1) : '' })}>← Previous</button>
+              <span>Page {paging.page} of {paging.totalPages}</span>
+              <button type="button" className={styles.button} disabled={!paging.hasNext}
+                onClick={() => updateParams({ [PRODUCT_PARAMS.page]: String(page + 1) })}>Next →</button>
+            </nav>
+          )}
         </>
       )}
     </section>

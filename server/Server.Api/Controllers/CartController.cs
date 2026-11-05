@@ -26,18 +26,23 @@ public class CartController(IProductCatalog catalog) : ControllerBase
     [HttpPost("price")]
     [ProducesResponseType<ApiResponse<CartQuoteDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status400BadRequest)]
-    public ActionResult<ApiResponse<CartQuoteDto>> Price(PriceCartDto input)
+    public async Task<ActionResult<ApiResponse<CartQuoteDto>>> Price(PriceCartDto input, CancellationToken ct)
     {
         // The same product twice? Merge the lines (and cap at the max quantity)
         var merged = input.Items
             .GroupBy(i => i.ProductId)
-            .Select(g => (ProductId: g.Key, Quantity: Math.Min(20, g.Sum(i => i.Quantity))));
+            .Select(g => (ProductId: g.Key, Quantity: Math.Min(20, g.Sum(i => i.Quantity))))
+            .ToList();
+
+        // ONE query for every product in the cart (WHERE Id IN (...)). Calling GetByIdAsync inside the loop
+        // below would send one query per line: the N+1 problem.
+        var found = (await catalog.GetByIdsAsync([.. merged.Select(m => m.ProductId)], ct)).ToDictionary(p => p.Id);
 
         var lines = new List<CartLineDto>();
         var unavailable = new List<int>();
         foreach (var (productId, quantity) in merged)
         {
-            var product = catalog.GetById(productId);
+            var product = found.GetValueOrDefault(productId);
             if (product is null)
             {
                 unavailable.Add(productId); // deleted or never existed: tell the client so it can drop the line

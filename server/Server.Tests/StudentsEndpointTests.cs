@@ -7,8 +7,8 @@ using Server.Api.Models.Dto;
 namespace Server.Tests;
 
 // Phase 2: integration tests run the real pipeline in memory (routing, DI, JSON) without a browser.
-public class StudentsEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public class StudentsEndpointTests(ApiFactory factory)
+    : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 

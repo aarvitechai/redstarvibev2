@@ -34,7 +34,7 @@ function answerApi() {
       const q = req.request.params.get('search')?.toLowerCase();
       let list = all.filter((p) => (!cat || p.categorySlug === cat) && (!q || p.name.toLowerCase().includes(q)));
       if (req.request.params.get('sort') === 'priceDesc') list = [...list].sort((a, b) => b.price - a.price);
-      req.flush(ok(list));
+      req.flush(ok({ items: list, page: 1, pageSize: 9, totalCount: list.length, totalPages: 1, hasNext: false, hasPrevious: false })); // Phase 11: paged
     } else {
       const p = all.find((x) => url === `${API}/products/${x.id}`);
       if (p) req.flush(ok(p));

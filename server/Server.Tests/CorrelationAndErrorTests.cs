@@ -24,8 +24,8 @@ file sealed class ExplodingStudentService : IStudentService
     public bool Delete(int id) => throw new NotImplementedException();
 }
 
-public class CorrelationAndErrorTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public class CorrelationAndErrorTests(ApiFactory factory)
+    : IClassFixture<ApiFactory>
 {
     private const string Header = CorrelationIdMiddleware.HeaderName;
 

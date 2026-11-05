@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 namespace Server.Tests;
 
 // Phase 0 smoke test: proves the API boots in-memory and /health answers.
-public class HealthEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public class HealthEndpointTests(ApiFactory factory)
+    : IClassFixture<ApiFactory>
 {
     [Fact]
     public async Task Health_ReturnsOk()

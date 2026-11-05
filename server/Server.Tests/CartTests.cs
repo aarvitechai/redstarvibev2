@@ -6,7 +6,7 @@ using Server.Api.Models;
 
 namespace Server.Tests;
 
-public class CartTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class CartTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 

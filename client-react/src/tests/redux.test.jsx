@@ -153,7 +153,7 @@ describe('UI with Redux', () => {
     mockFetch((url) => {
       const path = new URL(url).pathname;
       if (path === '/api/categories') return ok([]);
-      if (path === '/api/products') return ok(products);
+      if (path === '/api/products') return ok({ items: products, page: 1, pageSize: 9, totalCount: products.length, totalPages: 1, hasNext: false, hasPrevious: false });
       if (path === '/api/cart/price') return ok({ lines: [], subtotal: 19.5, itemCount: 3, unavailableProductIds: [] });
       return ok([]);
     });

@@ -33,8 +33,8 @@ public class StudentSearchServiceTests
     }
 }
 
-public class StudentSearchEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public class StudentSearchEndpointTests(ApiFactory factory)
+    : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 

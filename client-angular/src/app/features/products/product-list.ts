@@ -6,11 +6,12 @@ import { Router, RouterLink } from '@angular/router';
 import { Subject, catchError, debounceTime, map, of, startWith, switchMap } from 'rxjs';
 import { ApiError } from '../../core/http/api';
 import { AddToCartButton } from '../cart/add-to-cart-button';
-import { PRODUCT_SORTS, Product, ProductSort, ProductsApi } from './products-api';
+import { PRODUCT_SORTS, Product, ProductPage, ProductSort, ProductsApi, imageSrc } from './products-api';
 
 interface ListState {
   loading: boolean;
   products: Product[];
+  paging?: ProductPage;
   error: string | null;
 }
 
@@ -31,6 +32,9 @@ export class ProductList {
   readonly category = input<string>();
   readonly q = input<string>();
   readonly sort = input<string>();
+  readonly page = input<string>();
+  protected readonly pageNumber = computed(() => Math.max(1, Number(this.page()) || 1));
+  protected readonly imageSrc = imageSrc;
 
   protected readonly sorts = PRODUCT_SORTS;
   protected readonly sortValue = computed<ProductSort>(() =>
@@ -45,10 +49,10 @@ export class ProductList {
   private readonly categories = toSignal(this.api.categories$.pipe(catchError(() => of([]))), { initialValue: [] });
 
   protected readonly state = toSignal(
-    toObservable(computed(() => ({ category: this.category() ?? '', search: this.q() ?? '', sort: this.sortValue() }))).pipe(
+    toObservable(computed(() => ({ category: this.category() ?? '', search: this.q() ?? '', sort: this.sortValue(), page: this.pageNumber() }))).pipe(
       switchMap((filters) =>
         this.api.list(filters).pipe(
-          map((products): ListState => ({ loading: false, products, error: null })),
+          map((paging): ListState => ({ loading: false, products: paging.items, paging, error: null })),
           catchError((e: ApiError) => of<ListState>({ loading: false, products: [], error: e.message })),
           startWith<ListState>({ loading: true, products: [], error: null }),
         ),
@@ -66,7 +70,7 @@ export class ProductList {
     // Typing -> wait 300 ms -> write ?q= (replaceUrl: no history entry for every pause)
     this.typing
       .pipe(debounceTime(300), takeUntilDestroyed(inject(DestroyRef)))
-      .subscribe((value) => this.navigate({ q: value.trim() || null }, true));
+      .subscribe((value) => this.navigate({ q: value.trim() || null, page: null }, true)); // a new search starts at page 1
 
     // A data-driven page title
     const title = inject(Title);
@@ -81,7 +85,11 @@ export class ProductList {
 
   protected onSort(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
-    this.navigate({ sort: value === 'name' ? null : value });
+    this.navigate({ sort: value === 'name' ? null : value, page: null });
+  }
+
+  protected goTo(page: number): void {
+    this.navigate({ page: page > 1 ? String(page) : null });
   }
 
   protected clear(): void {

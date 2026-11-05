@@ -1,7 +1,7 @@
 import { Link, useLocation, useParams } from 'react-router';
 import { ROUTES } from '../../constants/routes';
 import { useQuery } from '../../hooks/useQuery';
-import { productsApi } from '../../services/productsApi';
+import { imageSrc, productsApi } from '../../services/productsApi';
 import { formatPrice } from '../../utility/format';
 import NotFoundPage from '../NotFoundPage';
 import AddToCartButton from '../../components/cart/AddToCartButton';
@@ -40,6 +40,7 @@ export default function ProductDetailPage() {
           <Link to={`${ROUTES.products}?category=${product.data.categorySlug}`} className={styles.badge}>
             {product.data.categoryName}
           </Link>
+          {product.data.imageUrl && <img className={styles.hero} src={imageSrc(product.data.imageUrl)} alt={product.data.name} width="640" height="360" />}
           <h1 id="product-title">{product.data.name}</h1>
           <p>{product.data.description}</p>
           <p className={styles.priceLarge}>{formatPrice(product.data.price)}</p>

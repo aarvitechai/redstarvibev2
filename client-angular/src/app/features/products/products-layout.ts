@@ -20,7 +20,7 @@ import { ProductsApi } from './products-api';
               <li>
                 <!-- queryParamsHandling="merge": change ONLY the category, and keep the search and sort the user chose.
                      A null value removes the param ("All"). -->
-                <a routerLink="/products" [queryParams]="{ category: c.slug || null }" queryParamsHandling="merge"
+                <a routerLink="/products" [queryParams]="{ category: c.slug || null, page: null }" queryParamsHandling="merge"
                    [class.active]="(category() ?? '') === c.slug" [attr.aria-current]="(category() ?? '') === c.slug ? 'page' : null">
                   {{ c.name }}
                 </a>

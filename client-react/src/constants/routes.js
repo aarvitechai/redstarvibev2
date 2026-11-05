@@ -17,7 +17,7 @@ export const ROUTES = {
 export const productPath = (id) => `${ROUTES.products}/${id}`;
 
 // Query-string keys for the product filter (the URL is the single source of truth for filters)
-export const PRODUCT_PARAMS = { category: 'category', search: 'q', sort: 'sort' };
+export const PRODUCT_PARAMS = { category: 'category', search: 'q', sort: 'sort', page: 'page' };
 export const PRODUCT_SORTS = [
   { value: 'name', label: 'Name' },
   { value: 'priceAsc', label: 'Price: low to high' },

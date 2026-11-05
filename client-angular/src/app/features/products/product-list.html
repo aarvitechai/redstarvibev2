@@ -26,13 +26,14 @@
     <div role="alert" class="error">Could not load products: {{ s.error }}</div>
   } @else {
     <p class="muted" aria-live="polite">
-      {{ s.loading ? 'Loading…' : s.products.length + ' product' + (s.products.length === 1 ? '' : 's') }}
+      {{ s.loading ? 'Loading…' : s.paging!.totalCount + ' product' + (s.paging!.totalCount === 1 ? '' : 's') }}
     </p>
     <ul class="grid" aria-label="Products" [attr.aria-busy]="s.loading">
       @for (p of s.products; track p.id) {
         <li class="card-shell">
           <!-- [state]: remembered by the router, read by the detail page for "Back to results" -->
           <a class="card" [routerLink]="['/products', p.id]" [state]="{ from: currentUrl }">
+            @if (p.imageUrl) { <img class="thumb" [src]="imageSrc(p.imageUrl)" alt="" loading="lazy" width="320" height="180" /> }
             <span class="badge">{{ p.categoryName }}</span>
             <strong>{{ p.name }}</strong>
             <span class="muted">{{ p.description }}</span>
@@ -45,6 +46,13 @@
     </ul>
     @if (!s.loading && s.products.length === 0) {
       <p class="muted">No products match these filters.</p>
+    }
+    @if (s.paging && s.paging.totalPages > 1) {
+      <nav class="pager" aria-label="Pagination">
+        <button type="button" class="btn" [disabled]="!s.paging.hasPrevious" (click)="goTo(s.paging.page - 1)">← Previous</button>
+        <span>Page {{ s.paging.page }} of {{ s.paging.totalPages }}</span>
+        <button type="button" class="btn" [disabled]="!s.paging.hasNext" (click)="goTo(s.paging.page + 1)">Next →</button>
+      </nav>
     }
   }
 </section>

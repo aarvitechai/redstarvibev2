@@ -15,7 +15,7 @@ namespace Server.Tests;
 
 // Phase 8: the SERVER decides who may do what. These tests call the API directly (no browser, no route guards),
 // which is exactly what an attacker would do.
-public class AuthTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class AuthTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 

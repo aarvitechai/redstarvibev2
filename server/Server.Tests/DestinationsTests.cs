@@ -53,7 +53,7 @@ public class DestinationServiceTests
     }
 }
 
-public class DestinationsEndpointTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class DestinationsEndpointTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 

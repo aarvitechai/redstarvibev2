@@ -69,7 +69,7 @@ public class AdminController(IStudentService students, IContactService contacts,
     [ProducesResponseType<ApiResponse<SummaryDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status403Forbidden)]
-    public ActionResult<ApiResponse<SummaryDto>> Summary() =>
+    public async Task<ActionResult<ApiResponse<SummaryDto>>> Summary(CancellationToken ct) =>
         Ok(ApiResponse<SummaryDto>.Ok(new SummaryDto(
-            students.GetAll().Count, contacts.GetAll().Count, catalog.Find(new ProductQuery()).Count, catalog.GetCategories().Count)));
+            students.GetAll().Count, contacts.GetAll().Count, await catalog.CountAsync(ct), (await catalog.GetCategoriesAsync(ct)).Count)));
 }

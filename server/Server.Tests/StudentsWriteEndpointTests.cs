@@ -9,8 +9,8 @@ namespace Server.Tests;
 // Phase 3: write endpoints. This class gets its OWN factory (and so its own singleton service),
 // which means the writes here never affect the read tests in StudentsEndpointTests.
 // Each test uses its own email, so the tests don't depend on running in a particular order.
-public class StudentsWriteEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public class StudentsWriteEndpointTests(ApiFactory factory)
+    : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 

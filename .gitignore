@@ -22,3 +22,6 @@ dist/
 .DS_Store
 Thumbs.db
 .idea/
+
+# Uploaded files (Phase 11)
+server/Server.Api/uploads/

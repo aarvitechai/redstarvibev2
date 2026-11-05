@@ -46,8 +46,8 @@ public class ContactServiceTests
     }
 }
 
-public class ContactsEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public class ContactsEndpointTests(ApiFactory factory)
+    : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 

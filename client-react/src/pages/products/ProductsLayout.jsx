@@ -14,6 +14,7 @@ export default function ProductsLayout() {
   // Build a link that changes ONLY the category, and keeps the search and sort the user already chose
   const categoryLink = (slug) => {
     const next = new URLSearchParams(searchParams);
+    next.delete(PRODUCT_PARAMS.page); // another category starts at page 1
     if (slug) next.set(PRODUCT_PARAMS.category, slug);
     else next.delete(PRODUCT_PARAMS.category);
     const query = next.toString();

@@ -4,7 +4,7 @@ Built one feature at a time, in three projects:
 
 | Folder | Stack | Dev URL |
 | --- | --- | --- |
-| `server/` | .NET 10 Web API, EF Core, SQL Server, xUnit | http://localhost:5240 (Scalar: `/scalar`, health: `/health`) |
+| `server/` | .NET 10 Web API, EF Core + SQL Server (`RedStarVibeDb`), xUnit | http://localhost:5240 (Scalar: `/scalar`, health: `/health`) |
 | `client-react/` | React 19 + Vite + React Router + Redux Toolkit + RTK Query | http://localhost:5173 |
 | `client-angular/` | Angular 21 (standalone, signals, Vitest) | http://localhost:4200 |
 
@@ -21,9 +21,17 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 8: Client-Side Auth](docs/phase-08-client-side-auth.md)
 - [Phase 9: Redux Toolkit (Project 4: counter and cart)](docs/phase-09-redux-toolkit.md)
 - [Phase 10: RTK Query (Project 5: Destination Manager)](docs/phase-10-rtk-query.md)
+- [Phase 11: EF Core + SQL Server (Project 6: Product API)](docs/phase-11-efcore.md)
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).
+
+## Database (once, and after pulling new migrations)
+```bash
+cd server
+ASPNETCORE_ENVIRONMENT=Development dotnet ef database update --project Server.Api
+```
+Tests create and delete their own `RedStarVibeDb_Test_*` databases; they never touch `RedStarVibeDb`.
 
 ## Run
 ```bash

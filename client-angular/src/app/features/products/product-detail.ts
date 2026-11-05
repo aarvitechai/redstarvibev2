@@ -7,7 +7,7 @@ import { catchError, map, of, startWith, switchMap } from 'rxjs';
 import { ApiError } from '../../core/http/api';
 import { AddToCartButton } from '../cart/add-to-cart-button';
 import { NotFound } from '../home/not-found';
-import { Product, ProductsApi } from './products-api';
+import { Product, ProductsApi, imageSrc } from './products-api';
 
 type DetailState =
   | { status: 'loading' }
@@ -33,6 +33,7 @@ type DetailState =
           @case ('ok') {
             <div class="detail">
               <a class="badge" routerLink="/products" [queryParams]="{ category: s.product.categorySlug }">{{ s.product.categoryName }}</a>
+              @if (s.product.imageUrl) { <img class="hero" [src]="imageSrc(s.product.imageUrl)" [alt]="s.product.name" width="640" height="360" /> }
               <h1 id="product-title">{{ s.product.name }}</h1>
               <p>{{ s.product.description }}</p>
               <p class="price-large">{{ s.product.price | currency: 'INR' : 'symbol' : '1.2-2' : 'en-IN' }}</p>
@@ -48,6 +49,7 @@ type DetailState =
 export class ProductDetail {
   private readonly api = inject(ProductsApi);
   readonly id = input.required<string>();
+  protected readonly imageSrc = imageSrc;
 
   // Navigation state set by the list's [state]. Missing when the user pasted the link or refreshed.
   private readonly navState = inject(Location).getState() as { from?: string } | null;

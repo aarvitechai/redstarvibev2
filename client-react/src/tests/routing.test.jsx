@@ -29,7 +29,8 @@ function fakeCatalog() {
       const q = u.searchParams.get('search')?.toLowerCase();
       let list = all.filter((p) => (!cat || p.categorySlug === cat) && (!q || p.name.toLowerCase().includes(q)));
       if (u.searchParams.get('sort') === 'priceDesc') list = list.toSorted((a, b) => b.price - a.price);
-      return ok(list);
+      // Phase 11: the API returns a PAGE
+      return ok({ items: list, page: 1, pageSize: 9, totalCount: list.length, totalPages: 1, hasNext: false, hasPrevious: false });
     }
     return fail(404, 'not mocked');
   });
@@ -83,7 +84,7 @@ describe('Product Filter (Project 3): the URL is the state', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Pizza' })).toBeInTheDocument();
     expect(screen.getByLabelText('Sort')).toHaveValue('priceDesc');
     const urls = await Promise.all(fetchMock.mock.calls.map((_, i) => callDetails(fetchMock, i).then((c) => c.url)));
-    expect(urls).toContain('http://localhost:5240/api/products?category=pizza&sort=priceDesc');
+    expect(urls).toContain('http://localhost:5240/api/products?page=1&pageSize=9&category=pizza&sort=priceDesc'); // Phase 11: paged
   });
 
   it('clicking a category updates the URL and keeps the other filters', async () => {
@@ -166,5 +167,37 @@ describe('Product detail (useParams + nested layout)', () => {
       const urls = await Promise.all(fetchMock.mock.calls.map((_, i) => callDetails(fetchMock, i).then((c) => c.url)));
       expect(urls.some((u) => u.includes('/products/abc'))).toBe(false);
     }
+  });
+});
+
+describe('Phase 11: paged products', () => {
+  it('Next goes to ?page=2, and changing the category goes back to page 1', async () => {
+    const user = userEvent.setup();
+    const page = (n) => ({ items: [all[n - 1]], page: n, pageSize: 1, totalCount: 3, totalPages: 3, hasNext: n < 3, hasPrevious: n > 1 });
+    mockFetch((url) => {
+      const u = new URL(url);
+      if (u.pathname === '/api/categories') return ok(categories);
+      return ok(page(Number(u.searchParams.get('page') ?? 1)));
+    });
+    renderApp('/products?sort=priceDesc');
+
+    expect(await screen.findByText('Page 1 of 3')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Next →' }));
+    expect(location()).toBe('/products?sort=priceDesc&page=2');
+    expect(await screen.findByText('Page 2 of 3')).toBeInTheDocument();
+
+    await user.click(within(screen.getByRole('navigation', { name: 'Categories' })).getByRole('link', { name: 'Pizza' }));
+    expect(location()).toBe('/products?sort=priceDesc&category=pizza'); // page removed
+  });
+
+  it('shows the product image from the API origin', async () => {
+    mockFetch((url) => {
+      const u = new URL(url);
+      if (u.pathname === '/api/categories') return ok(categories);
+      return ok({ items: [{ ...all[0], imageUrl: '/images/products/abc.png' }], page: 1, pageSize: 9, totalCount: 1, totalPages: 1, hasNext: false, hasPrevious: false });
+    });
+    const { container } = renderApp('/products');
+    await screen.findByText('1 product');
+    expect(container.querySelector('img').getAttribute('src')).toBe('http://localhost:5240/images/products/abc.png');
   });
 });
