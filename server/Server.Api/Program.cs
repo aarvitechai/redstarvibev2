@@ -1,4 +1,10 @@
+using System.IO.Compression;
+using System.Net;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -18,6 +24,9 @@ using Server.Api.Services;
 
 // Phase 13 adds orders; Phase 15 adds production hardening.
 var builder = WebApplication.CreateBuilder(args);
+
+// Phase 15: don't advertise the server software ("Server: Kestrel") to attackers
+builder.WebHost.ConfigureKestrel(k => k.AddServerHeader = false);
 
 const string ClientCorsPolicy = "ClientCors";
 
@@ -39,9 +48,13 @@ builder.Services.AddSingleton<IContactService, InMemoryContactService>(); // Pha
 builder.Services.AddDbContext<ApplicationDbContext>((services, options) =>
 {
     var connectionString = services.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection");
+    // No connection string configured: register SQL Server WITHOUT one, so a tool can supply it later.
+    // Phase 15: the EF migration BUNDLE creates this DbContext first and only then applies its --connection argument.
+    // Throwing here broke the bundle (caught by trying it). The running API still fails fast: see the check after Build().
     if (string.IsNullOrWhiteSpace(connectionString))
-        throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
-    options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure(maxRetryCount: 3)); // retry brief network blips
+        options.UseSqlServer(sql => sql.EnableRetryOnFailure(maxRetryCount: 3));
+    else
+        options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure(maxRetryCount: 3)); // retry brief network blips
 });
 
 // DI LIFETIMES:
@@ -140,14 +153,53 @@ builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();   // used for non-API errors (e.g. 404 for an unknown route)
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // Phase 6: unhandled exceptions -> 500 envelope with a reference id
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<ApplicationDbContext>("database"); // /health now also checks that SQL Server answers
+    .AddDbContextCheck<ApplicationDbContext>("database", tags: [HealthResponses.ReadyTag]); // /health/ready checks SQL Server
+
+// Phase 15: RESPONSE COMPRESSION. JSON shrinks 70-90%, so pages of products load faster on slow phones.
+// EnableForHttps: compression over HTTPS opens the door to BREACH-style attacks ONLY when one response mixes a secret
+// with text an attacker controls. Our token responses (login/refresh) never echo user input, so we accept it.
+builder.Services.AddResponseCompression(o =>
+{
+    o.EnableForHttps = true;
+    o.Providers.Add<BrotliCompressionProvider>(); // first = preferred, when the browser accepts both
+    o.Providers.Add<GzipCompressionProvider>();
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+builder.Services.Configure<GzipCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+
+// Phase 15: FORWARDED HEADERS. Behind a reverse proxy (nginx, a load balancer), every request seems to come from the
+// PROXY's address, over plain http. The proxy passes the real values in X-Forwarded-For / X-Forwarded-Proto.
+// Trust them ONLY when the API is reachable through the proxy alone. Otherwise anyone could send
+// "X-Forwarded-For: <random>" and get a fresh rate-limit bucket on every request (a test proves it).
+builder.Services.AddOptions<ForwardedHeadersOptions>().Configure<IConfiguration>((o, config) =>
+{
+    if (!config.GetValue<bool>("ForwardedHeaders:Enabled")) return; // off by default: headers ignored
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    o.ForwardLimit = 1; // only the LAST hop, i.e. the value OUR proxy wrote
+    var proxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? [];
+    if (proxies.Length > 0)
+    {
+        o.KnownProxies.Clear();
+        foreach (var ip in proxies) o.KnownProxies.Add(IPAddress.Parse(ip));
+    }
+    else
+    {
+        // In a container network the proxy's IP isn't fixed: trust whoever is in front. Safe only because
+        // docker-compose publishes the API to nobody but the proxy.
+        o.KnownIPNetworks.Clear();
+        o.KnownProxies.Clear();
+    }
+});
 
 // Allowed client origins come from configuration (appsettings / env vars), never hard-coded for prod.
 // Read lazily from the FINAL configuration, like every other setting (see the Phase 11 lesson).
+// Phase 15: validated at startup (no wildcards, real origins, https outside Development)
+builder.Services.AddOptions<CorsSettings>().BindConfiguration(CorsSettings.Section).ValidateOnStart();
+builder.Services.AddSingleton<IValidateOptions<CorsSettings>, CorsSettingsValidator>();
 builder.Services.AddCors();
-builder.Services.AddOptions<CorsOptions>().Configure<IConfiguration>((options, config) =>
+builder.Services.AddOptions<CorsOptions>().Configure<IOptions<CorsSettings>>((options, cors) =>
 {
-    var allowedOrigins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+    var allowedOrigins = cors.Value.AllowedOrigins;
     options.AddPolicy(ClientCorsPolicy, policy =>
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
@@ -164,9 +216,13 @@ if (string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("DefaultConn
     throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
 
 // Middleware order matters:
-//   correlation id -> request log -> exception handler -> HTTPS -> CORS -> AuthN -> AuthZ -> endpoints
-// The correlation id comes FIRST, so even a crash's 500 response and its log lines carry the id.
+//   forwarded headers -> correlation id -> security headers -> request log -> exception handler -> HTTPS
+//   -> compression -> static files -> CORS -> rate limit -> AuthN -> AuthZ -> endpoints
+// Forwarded headers come FIRST, so everything after them (logs, HTTPS redirect, rate limiting) sees the REAL
+// client IP and scheme. The correlation id is next, so even a crash's 500 response and its log lines carry the id.
+app.UseForwardedHeaders(); // does nothing unless ForwardedHeaders:Enabled
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
@@ -182,6 +238,7 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseResponseCompression(); // before static files and controllers, so it can compress what they write
 
 // Uploaded product images: served from ONE folder at ONE URL prefix (/images/products/<random>.png).
 // Cache headers: the file names are random and never reused, so browsers can cache them for a long time.
@@ -201,7 +258,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health");
+// Phase 15: liveness vs readiness (see HealthResponses)
+app.MapHealthChecks("/health", new HealthCheckOptions { ResponseWriter = HealthResponses.WriteJson });
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false, ResponseWriter = HealthResponses.WriteJson });
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains(HealthResponses.ReadyTag),
+    ResponseWriter = HealthResponses.WriteJson,
+});
 
 // DEVELOPMENT demo accounts (admin@redstar.dev / asha@redstar.dev). Never outside Development: well-known passwords.
 if (app.Configuration.GetValue<bool>("Auth:SeedDemoUsers"))
@@ -210,6 +274,10 @@ if (app.Configuration.GetValue<bool>("Auth:SeedDemoUsers"))
         throw new InvalidOperationException("Auth:SeedDemoUsers must only be true in Development.");
     await IdentitySeeder.SeedDemoUsersAsync(app.Services);
 }
+
+// Phase 15: the first admin in production (see IdentitySeeder.EnsureBootstrapAdminAsync)
+if (await IdentitySeeder.EnsureBootstrapAdminAsync(app.Services, app.Configuration["Auth:BootstrapAdmin:Email"], app.Configuration["Auth:BootstrapAdmin:Password"]))
+    app.Logger.LogWarning("Created the bootstrap admin {Email}. Remove Auth:BootstrapAdmin from the configuration now.", app.Configuration["Auth:BootstrapAdmin:Email"]);
 
 app.Run();
 

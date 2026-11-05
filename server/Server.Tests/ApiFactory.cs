@@ -31,6 +31,9 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     // Tests log in a lot. The dedicated rate-limit tests use a factory with a small limit (see AuthTests).
     protected virtual int RateLimit => 10_000;
 
+    // Extra settings for a specialised factory (Phase 15: forwarded headers)
+    protected virtual IReadOnlyDictionary<string, string?> ExtraSettings => new Dictionary<string, string?>();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Added LAST, so these override appsettings.Development.json (which points at the real dev database)
@@ -41,7 +44,7 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Jwt:SigningKey"] = TestSigningKey,            // a test-only key (the real one lives in User Secrets)
             ["Auth:SeedDemoUsers"] = "false",               // seeded in InitializeAsync, AFTER the database exists
             ["RateLimiting:AuthPermitLimit"] = RateLimit.ToString(),
-        }));
+        }).AddInMemoryCollection(ExtraSettings));
     }
 
     public const string TestDatabasePrefix = "RedStarVibeDb_Test_";

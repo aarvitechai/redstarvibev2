@@ -145,7 +145,9 @@ public class ProductsEndpointTests(ApiFactory factory) : IClassFixture<ApiFactor
     {
         var response = await _client.GetAsync("/health");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal("Healthy", await response.Content.ReadAsStringAsync());
+        // Phase 15: a JSON summary per check (no exception details)
+        using var json = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Equal("Healthy", json.RootElement.GetProperty("checks").GetProperty("database").GetString());
     }
 }
 

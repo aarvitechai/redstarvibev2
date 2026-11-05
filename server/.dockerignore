@@ -1,0 +1,7 @@
+# Keep the build context small and free of local state
+**/bin/
+**/obj/
+**/*.user
+Server.Api/uploads/
+Server.Tests/
+**/TestResults/

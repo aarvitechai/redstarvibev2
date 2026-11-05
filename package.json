@@ -13,7 +13,11 @@
     "test:react": "npm --prefix client-react exec vitest run",
     "test:angular": "npm --prefix client-angular test -- --watch=false",
     "build": "dotnet build server -c Release && npm --prefix client-react run build && npm --prefix client-angular run build",
-    "db:update": "dotnet ef database update --project server/Server.Api -- --environment Development"
+    "db:update": "dotnet ef database update --project server/Server.Api -- --environment Development",
+    "db:script": "dotnet ef migrations script --idempotent --project server/Server.Api -o artifacts/migrate.sql",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "audit": "dotnet list server/Server.slnx package --vulnerable --include-transitive && npm --prefix client-react audit --omit=dev && npm --prefix client-angular audit --omit=dev"
   },
   "devDependencies": {
     "concurrently": "^9.2.5"

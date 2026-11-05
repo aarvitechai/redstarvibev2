@@ -25,6 +25,7 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 12: Identity, JWT, Roles and CORS (Project 7: Auth API)](docs/phase-12-identity-jwt.md)
 - [Phase 13: Orders and Ratings (Project 8)](docs/phase-13-orders-ratings.md)
 - [Phase 14: Capstone – Admin app, polish, one-command run (Projects 9 and 10)](docs/phase-14-capstone.md)
+- [Phase 15: Production Hardening (security headers, health, compression, Docker, CI)](docs/phase-15-production-hardening.md)
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).
@@ -41,6 +42,13 @@ npm run install:all      # once: root + client-react + client-angular
 npm run dev              # API :5240 + React :5173 + Angular :4200, colour-coded output; Ctrl+C stops all three
 ```
 Copy `client-react/.env.example` to `.env` first. Single apps: `npm run dev:api`, `npm run dev:react`, `npm run dev:angular`.
+
+## Run in containers (production-like)
+```bash
+cp .env.example .env     # fill in the secrets (git-ignored)
+npm run docker:up        # SQL Server + migrations + API + React :8081 + Angular :8082
+npm run docker:down
+```
 
 ## Test
 ```bash

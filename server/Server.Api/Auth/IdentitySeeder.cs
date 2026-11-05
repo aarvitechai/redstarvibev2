@@ -31,4 +31,28 @@ public static class IdentitySeeder
             await users.AddToRoleAsync(user, role);
         }
     }
+
+    // Phase 15: PRODUCTION'S FIRST ADMIN. Demo users are refused outside Development, so a fresh production database
+    // has no way to log in to the admin app. Auth:BootstrapAdmin:Email/Password (environment variables or a secret
+    // store, never appsettings.json) create ONE admin, only while there is NO admin yet. Once one exists this does nothing,
+    // so the secret can (and should) be removed after the first start.
+    public static async Task<bool> EnsureBootstrapAdminAsync(IServiceProvider services, string? email, string? password)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password)) return false;
+
+        using var scope = services.CreateScope();
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        if ((await users.GetUsersInRoleAsync(Roles.Admin)).Count > 0) return false; // already bootstrapped
+
+        var user = await users.FindByEmailAsync(email);
+        if (user is null)
+        {
+            user = new ApplicationUser { UserName = email, Email = email, Name = "Administrator", EmailConfirmed = true };
+            var created = await users.CreateAsync(user, password); // the normal password rules apply
+            if (!created.Succeeded)
+                throw new InvalidOperationException($"Could not create the bootstrap admin: {string.Join("; ", created.Errors.Select(e => e.Description))}");
+        }
+        await users.AddToRoleAsync(user, Roles.Admin);
+        return true;
+    }
 }

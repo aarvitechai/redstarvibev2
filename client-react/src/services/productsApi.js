@@ -4,7 +4,11 @@ import { request } from './http';
 export const PRODUCTS_PAGE_SIZE = 9;
 
 // Image paths come back relative (/images/products/x.png). They live on the API's origin, not the client's.
-export const imageSrc = (imageUrl) => (imageUrl ? new URL(imageUrl, API_URL).href : null);
+// Phase 15: API_URL may itself be RELATIVE ("/api", behind a reverse proxy that serves client and API on one origin).
+// new URL(path, "/api") THROWS (a relative base has no origin), so resolve the API URL against the page first.
+export const resolveImageUrl = (imageUrl, apiUrl, pageOrigin) =>
+  imageUrl ? new URL(imageUrl, new URL(apiUrl, pageOrigin)).href : null;
+export const imageSrc = (imageUrl) => resolveImageUrl(imageUrl, API_URL, window.location.origin);
 
 // Phase 7: the read-only catalogue (Project 3). Filters go to the API as the same query string the page keeps in its URL.
 export const productsApi = {

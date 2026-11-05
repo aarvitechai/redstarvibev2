@@ -34,8 +34,10 @@ export interface ProductPage {
 export const PRODUCTS_PAGE_SIZE = 9;
 
 // Image paths come back relative (/images/products/x.png). They live on the API's origin, not the client's.
-export const imageSrc = (imageUrl: string | null): string | null =>
-  imageUrl ? new URL(imageUrl, environment.apiUrl.startsWith('http') ? environment.apiUrl : location.origin).href : null;
+// Phase 15: the production apiUrl is RELATIVE ('/api', behind the reverse proxy), so resolve it against the page first
+export const resolveImageUrl = (imageUrl: string | null, apiUrl: string, pageOrigin: string): string | null =>
+  imageUrl ? new URL(imageUrl, new URL(apiUrl, pageOrigin)).href : null;
+export const imageSrc = (imageUrl: string | null): string | null => resolveImageUrl(imageUrl, environment.apiUrl, location.origin);
 
 export type ProductSort = 'name' | 'priceAsc' | 'priceDesc';
 export interface ProductFilters {

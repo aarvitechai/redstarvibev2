@@ -25,3 +25,6 @@ Thumbs.db
 
 # Uploaded files (Phase 11)
 server/Server.Api/uploads/
+
+# Build outputs (Phase 15: migration script, publish folder)
+artifacts/
