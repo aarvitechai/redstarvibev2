@@ -26,8 +26,9 @@ export default function DirectoryPage() {
   );
 
   return (
-    <section id="directory">
-      <h2>Directory (live API)</h2>
+    <section>
+      <title>Directory · RedStarVibe</title>
+      <h1>Directory (live API)</h1>
 
       <div className={styles.toolbar}>
         <label>

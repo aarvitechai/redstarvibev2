@@ -47,3 +47,13 @@ Content-Type: application/json
 { "isFavourite": true }
 
 ###
+### Phase 7: categories and products (sort = name | priceAsc | priceDesc)
+GET {{Server.Api_HostAddress}}/api/categories
+
+###
+GET {{Server.Api_HostAddress}}/api/products?category=pizza&sort=priceDesc
+
+###
+GET {{Server.Api_HostAddress}}/api/products/4
+
+###

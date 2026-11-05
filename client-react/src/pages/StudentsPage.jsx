@@ -23,7 +23,8 @@ export default function StudentsPage() {
   const visible = activeOnly ? students.filter((s) => s.isActive) : students;
 
   return (
-    <section id="students">
+    <section>
+      <title>Students · RedStarVibe</title>
       <h1>Students</h1>
       <StudentStats students={students} />
 

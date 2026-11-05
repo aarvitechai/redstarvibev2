@@ -5,7 +5,7 @@ Built one feature at a time, in three projects:
 | Folder | Stack | Dev URL |
 | --- | --- | --- |
 | `server/` | .NET 10 Web API, EF Core, SQL Server, xUnit | http://localhost:5240 (Scalar: `/scalar`, health: `/health`) |
-| `client-react/` | React 19 + Vite (Redux Toolkit / RTK Query come later) | http://localhost:5173 |
+| `client-react/` | React 19 + Vite + React Router (Redux Toolkit / RTK Query come later) | http://localhost:5173 |
 | `client-angular/` | Angular 21 (standalone, signals, Vitest) | http://localhost:4200 |
 
 The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.md).
@@ -17,6 +17,7 @@ The roadmap is in [plan.md](plan.md). Mistakes and fixes go in [NOTES.md](NOTES.
 - [Phase 4: Hooks Beyond State](docs/phase-04-hooks-beyond-state.md)
 - [Phase 5: Forms and React 19 Actions (Project 2: Contact List)](docs/phase-05-forms-and-actions.md)
 - [Phase 6: Axios Service Layer](docs/phase-06-axios-service-layer.md)
+- [Phase 7: Routing (Project 3: Product Filter)](docs/phase-07-routing.md)
 
 ## Prerequisites
 Node LTS, .NET 10 SDK, `dotnet-ef`, Angular CLI, and SQL Server instance `DESKTOP-2ERCDGB\MSSQLSERVER01` (Windows auth).

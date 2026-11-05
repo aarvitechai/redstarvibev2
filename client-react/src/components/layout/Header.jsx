@@ -1,18 +1,29 @@
+import { Link, NavLink } from 'react-router';
+import { ROUTES } from '../../constants/routes';
 import ThemeToggle from './ThemeToggle';
 import styles from './Layout.module.css';
 
-// Props are read-only inputs. The parent decides `appName`; Header only displays it.
+const NAV = [
+  { to: ROUTES.products, label: 'Products' },
+  { to: ROUTES.students, label: 'Students' },
+  { to: ROUTES.directory, label: 'Directory' },
+  { to: ROUTES.contacts, label: 'Contacts' },
+  { to: ROUTES.playground, label: 'Playground' },
+];
+
+// <NavLink> = <Link> that knows when it's ACTIVE: it adds aria-current="page" and lets className be a function.
+// <Link> changes the URL WITHOUT a page reload: React swaps the matching route and keeps all app state.
 export default function Header({ appName }) {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <span className={styles.brand}>{appName}</span>
+        <Link to={ROUTES.home} className={styles.brand}>{appName}</Link>
         <nav aria-label="Main">
-          {/* Plain links for now; React Router <Link> replaces them in Phase 7 */}
-          <a className={styles.navLink} href="#students">Students</a>
-          <a className={styles.navLink} href="#directory">Directory</a>
-          <a className={styles.navLink} href="#contacts">Contacts</a>
-          <a className={styles.navLink} href="#playground">Playground</a>
+          {NAV.map(({ to, label }) => (
+            <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.navLinkActive : styles.navLink)}>
+              {label}
+            </NavLink>
+          ))}
           <ThemeToggle />
         </nav>
       </div>

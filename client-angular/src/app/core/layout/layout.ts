@@ -1,20 +1,20 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { ActivityBar } from './activity-bar';
 import { Footer } from './footer';
 import { Header } from './header';
 
-// Composition: <ng-content /> is Angular's version of React's {children}.
-// Whatever goes between <app-layout> ... </app-layout> is "projected" here.
-// Phase 7 replaces it with <router-outlet />.
+// The app shell. <router-outlet /> is where the matched route's component appears (React's <Outlet />).
+// Navigating swaps only the outlet; the header, footer and theme stay put.
 @Component({
   selector: 'app-layout',
-  imports: [ActivityBar, Header, Footer],
+  imports: [ActivityBar, Header, Footer, RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
       <app-activity-bar />
       <app-header [appName]="appName()" />
-      <main class="main"><ng-content /></main>
+      <main class="main"><router-outlet /></main>
       <app-footer [appName]="appName()" />
     </div>
   `,

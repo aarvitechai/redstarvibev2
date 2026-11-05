@@ -84,8 +84,9 @@ export default function ContactsPage() {
   }
 
   return (
-    <section id="contacts">
-      <h2>Contacts</h2>
+    <section>
+      <title>Contacts · RedStarVibe</title>
+      <h1>Contacts</h1>
 
       <fieldset className={styles.modes}>
         <legend>Add form built with</legend>

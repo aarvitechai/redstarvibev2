@@ -18,6 +18,8 @@
 nav { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .navLink { color: var(--text); text-decoration: none; font-weight: 500; }
 .navLink:hover { color: var(--primary); }
+.navLinkActive { color: var(--primary); text-decoration: none; font-weight: 700; border-bottom: 2px solid var(--primary); }
+.brand { text-decoration: none; }
 nav { align-items: center; }
 .themeToggle {
   font: inherit; line-height: 1; padding: 6px 8px; border-radius: 8px; cursor: pointer;

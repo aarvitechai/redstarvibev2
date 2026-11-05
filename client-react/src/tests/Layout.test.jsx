@@ -1,23 +1,18 @@
 import { screen } from '@testing-library/react';
-import { renderWithProviders as render } from './renderWithProviders';
 import { describe, expect, it } from 'vitest';
-import Layout from '../components/layout/Layout';
+import { renderApp } from './renderWithProviders';
 
-describe('Layout', () => {
-  it('renders header, footer and whatever is passed as children', () => {
-    render(
-      <Layout appName="TestApp">
-        <p>Page content</p>
-      </Layout>,
-    );
+describe('Layout (a layout route with <Outlet />)', () => {
+  it('renders header and footer around the matched page', async () => {
+    renderApp('/playground');
 
-    expect(screen.getByRole('banner')).toHaveTextContent('TestApp'); // <header>
-    expect(screen.getByRole('contentinfo')).toHaveTextContent(`© ${new Date().getFullYear()} TestApp`); // <footer>
-    expect(screen.getByRole('main')).toContainElement(screen.getByText('Page content'));
+    expect(screen.getByRole('banner')).toHaveTextContent('RedStarVibe'); // <header>
+    expect(screen.getByRole('contentinfo')).toHaveTextContent(`© ${new Date().getFullYear()} RedStarVibe`); // <footer>
+    expect(screen.getByRole('main')).toContainElement(screen.getByRole('heading', { level: 1, name: 'Playground' }));
   });
 
-  it('uses a default appName when none is passed', () => {
-    render(<Layout />);
-    expect(screen.getByRole('banner')).toHaveTextContent('RedStarVibe');
+  it('the brand links home', () => {
+    renderApp('/playground');
+    expect(screen.getByRole('link', { name: 'RedStarVibe' })).toHaveAttribute('href', '/');
   });
 });

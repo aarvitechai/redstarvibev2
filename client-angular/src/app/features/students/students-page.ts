@@ -18,7 +18,7 @@ import {
   imports: [StudentList, StudentStats, AddStudentForm],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section id="students">
+    <section>
       <h1>Students</h1>
       <app-student-stats [students]="students()" />
 

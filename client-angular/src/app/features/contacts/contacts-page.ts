@@ -18,8 +18,8 @@ let pendingSeq = 0;
   imports: [ContactForm, ContactItem],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section id="contacts">
-      <h2>Contacts</h2>
+    <section>
+      <h1>Contacts</h1>
       <app-contact-form [save]="createOptimistically" />
 
       @if (actionError()) { <p role="alert" class="form-error">{{ actionError() }}</p> }

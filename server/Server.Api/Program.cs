@@ -17,6 +17,7 @@ builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = ValidationResponses.InvalidModelState);
 builder.Services.AddSingleton<IStudentService, InMemoryStudentService>(); // in-memory until Phase 11 (EF Core)
 builder.Services.AddSingleton<IContactService, InMemoryContactService>(); // Phase 5
+builder.Services.AddSingleton<IProductCatalog, InMemoryProductCatalog>(); // Phase 7
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();   // used for non-API errors (e.g. 404 for an unknown route)
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // Phase 6: unhandled exceptions -> 500 envelope with a reference id
